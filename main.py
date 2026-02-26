@@ -14,6 +14,7 @@ import math
 import random
 import time
 import csv
+import re
 from datetime import datetime, timezone
 
 import numpy as np
@@ -21,7 +22,7 @@ import numpy as np
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QColor, QIcon
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QMessageBox, QVBoxLayout
+    QApplication, QMainWindow, QMessageBox, QVBoxLayout, QFileDialog
 )
 
 # pyqtgraph grafik kütüphanesi
@@ -228,6 +229,7 @@ class GCSMainWindow(QMainWindow):
     def _connect_signals(self):
         self.ui.btn_start_mission.clicked.connect(self._on_start_mission)
         self.ui.btn_upload_mission.clicked.connect(self._on_upload_mission)
+        self.ui.btn_import_wp.clicked.connect(self._on_import_wp)
         self.ui.btn_clear_waypoints.clicked.connect(self._on_clear_waypoints)
         self.ui.btn_estop.clicked.connect(self._on_emergency_stop)
         self.ui.btn_mode_switch.clicked.connect(self._on_mode_switch)
@@ -246,6 +248,16 @@ class GCSMainWindow(QMainWindow):
     def _on_start_mission(self):
         if self.mission_started:
             return
+            
+        if not self.ui.check_wifi.isChecked() or not self.ui.check_race_mode.isChecked():
+            QMessageBox.warning(self, "Uyarı", "Lütfen PRE-FLIGHT COMPATIBILITY panelindeki tüm onayları verin!")
+            return
+            
+        wp = self._get_waypoints()
+        if not wp:
+            QMessageBox.warning(self, "Hata", "Geçerli bir waypoint yüklenmedi!\nKoordinatların formatı tam ondalıklı (örn. 37.8043514) olmalı ve noktadan sonra 7 hane bulundurmalıdır.")
+            return
+
         self.mission_started = True
         self.vehicle["mode"] = "MISSION"
         self.mission_state = "WP1 → WP2"
@@ -256,6 +268,38 @@ class GCSMainWindow(QMainWindow):
         self.ui.btn_start_mission.setEnabled(False)
         self._start_csv_logging()
         self.statusBar().showMessage("✓ Görev başlatıldı — Araç otonom çalışıyor")
+
+    def _on_import_wp(self):
+        if self.mission_started:
+            return
+        
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Görev Dosyası Seç", "", "Text/CSV Files (*.txt *.csv);;All Files (*)"
+        )
+        if not file_path:
+            return
+            
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                
+            idx = 0
+            for line in lines:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                # Virgül, sekme veya boşlukla ayrılmış
+                parts = re.split(r'[;,\t\s]+', line)
+                if len(parts) >= 2 and idx < len(self.ui.wp_entries):
+                    self.ui.wp_entries[idx][0].setText(parts[0].strip())
+                    self.ui.wp_entries[idx][1].setText(parts[1].strip())
+                    idx += 1
+            
+            self.statusBar().showMessage(f"✓ Dosyadan {idx} waypoint okundu")
+            if idx == 0:
+                QMessageBox.warning(self, "Uyarı", "Seçilen dosyadan hiç geçerli koordinat satırı okunamadı.")
+        except Exception as e:
+            QMessageBox.critical(self, "Hata", f"Dosya okunurken hata oluştu:\n{e}")
 
     def _on_upload_mission(self):
         if self.mission_started:
@@ -346,6 +390,11 @@ class GCSMainWindow(QMainWindow):
         self.ui.combo_target_color.setEnabled(not locked)
         self.ui.btn_upload_mission.setEnabled(not locked)
         self.ui.btn_clear_waypoints.setEnabled(not locked)
+        self.ui.btn_import_wp.setEnabled(not locked)
+        self.ui.combo_frequency.setEnabled(not locked)
+        self.ui.check_wifi.setEnabled(not locked)
+        self.ui.check_race_mode.setEnabled(not locked)
+        self.ui.btn_mode_switch.setEnabled(not locked)
 
     # ═══════════════════════════════════════════════════════
     # SİMÜLASYON DÖNGÜSÜ (500ms)
@@ -727,10 +776,20 @@ class GCSMainWindow(QMainWindow):
     def _get_waypoints(self):
         """Waypoint giriş alanlarından geçerli (lat, lon) tuple listesi döner."""
         waypoints = []
+        pattern = re.compile(r"^-?\d{1,3}\.\d{7}$")
         for edit_lat, edit_lon in self.ui.wp_entries:
+            lat_str = edit_lat.text().strip()
+            lon_str = edit_lon.text().strip()
+            
+            if not lat_str or not lon_str:
+                continue
+                
+            if not pattern.match(lat_str) or not pattern.match(lon_str):
+                continue
+                
             try:
-                lat = float(edit_lat.text())
-                lon = float(edit_lon.text())
+                lat = float(lat_str)
+                lon = float(lon_str)
                 waypoints.append((lat, lon))
             except ValueError:
                 continue

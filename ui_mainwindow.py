@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QLineEdit, QComboBox, QGroupBox,
     QFrame, QSplitter, QSizePolicy, QSpacerItem, QScrollArea,
-    QStatusBar
+    QStatusBar, QFileDialog, QCheckBox
 )
 
 # Özel widget import'ları (Qt Designer'da "Promote" edilir)
@@ -291,18 +291,60 @@ class Ui_MainWindow(object):
         mission_lay.addWidget(self.lbl_upload_status)
 
         # Butonlar
-        self.btn_upload_mission = QPushButton("⬆  Upload Mission")
-        self.btn_upload_mission.setObjectName("btn_upload_mission")
-        self.btn_upload_mission.setFont(QFont("Segoe UI", 9, QFont.Bold))
-        self.btn_upload_mission.setFixedHeight(32)
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(4)
+        
+        self.btn_import_wp = QPushButton("📂 Import File")
+        self.btn_import_wp.setObjectName("btn_import_wp")
+        self.btn_import_wp.setFont(QFont("Segoe UI", 9))
+        self.btn_import_wp.setFixedHeight(32)
 
         self.btn_clear_waypoints = QPushButton("🗑  Clear Waypoints")
         self.btn_clear_waypoints.setObjectName("btn_clear_waypoints")
         self.btn_clear_waypoints.setFont(QFont("Segoe UI", 9))
         self.btn_clear_waypoints.setFixedHeight(32)
 
+        btn_layout.addWidget(self.btn_import_wp)
+        btn_layout.addWidget(self.btn_clear_waypoints)
+        mission_lay.addLayout(btn_layout)
+
+        self.btn_upload_mission = QPushButton("⬆  Upload Mission")
+        self.btn_upload_mission.setObjectName("btn_upload_mission")
+        self.btn_upload_mission.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        self.btn_upload_mission.setFixedHeight(32)
         mission_lay.addWidget(self.btn_upload_mission)
-        mission_lay.addWidget(self.btn_clear_waypoints)
+
+        # Uyumluluk Paneli
+        sep2 = QFrame()
+        sep2.setObjectName("panel_separator")
+        sep2.setFrameShape(QFrame.HLine)
+        sep2.setFixedHeight(1)
+        mission_lay.addWidget(sep2)
+
+        lbl_compat = QLabel("PRE-FLIGHT COMPATIBILITY")
+        lbl_compat.setFont(QFont("Consolas", 9, QFont.Bold))
+        lbl_compat.setStyleSheet("color: #cbd5e1;")
+        mission_lay.addWidget(lbl_compat)
+
+        freq_layout = QHBoxLayout()
+        freq_layout.setContentsMargins(0, 0, 0, 0)
+        lbl_freq = QLabel("Frequency:")
+        lbl_freq.setFont(QFont("Consolas", 8))
+        self.combo_frequency = QComboBox()
+        self.combo_frequency.setFont(QFont("Consolas", 8))
+        self.combo_frequency.addItems(["433 MHz", "868 MHz", "900 MHz", "2.4 GHz"])
+        freq_layout.addWidget(lbl_freq)
+        freq_layout.addWidget(self.combo_frequency)
+        mission_lay.addLayout(freq_layout)
+
+        self.check_wifi = QCheckBox("Wi-Fi is OFF (Required)")
+        self.check_wifi.setFont(QFont("Consolas", 8))
+        self.check_race_mode = QCheckBox("Competition Mode Verified")
+        self.check_race_mode.setFont(QFont("Consolas", 8))
+        
+        mission_lay.addWidget(self.check_wifi)
+        mission_lay.addWidget(self.check_race_mode)
+
         mission_lay.addStretch()
 
         # ── NAVIGATION MAP ──────────────────────────────
