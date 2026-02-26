@@ -165,9 +165,20 @@ class Ui_MainWindow(object):
         # Start Mission butonu
         self.btn_start_mission = QPushButton("▶  Start Mission")
         self.btn_start_mission.setObjectName("btn_start_mission")
-        self.btn_start_mission.setFixedSize(150, 36)
+        self.btn_start_mission.setFixedSize(140, 36)
         self.btn_start_mission.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        self.btn_start_mission.setCursor(Qt.PointingHandCursor)
+        self.btn_start_mission.setToolTip("Otonom görevi başlatır (Hazırlık onayları gerekir)")
         header_layout.addWidget(self.btn_start_mission)
+
+        # E-STOP Butonu (Header'da Sabit)
+        self.btn_estop = QPushButton("⛔  E-STOP")
+        self.btn_estop.setObjectName("btn_estop")
+        self.btn_estop.setFixedSize(120, 36)
+        self.btn_estop.setFont(QFont("Segoe UI", 12, QFont.Bold))
+        self.btn_estop.setCursor(Qt.PointingHandCursor)
+        self.btn_estop.setToolTip("ACİL DURDURMA: Motor gücünü anında keser")
+        header_layout.addWidget(self.btn_estop)
 
         # Power durumu
         self.lbl_power_status = QLabel("⏻ ACTIVE")
@@ -202,11 +213,13 @@ class Ui_MainWindow(object):
         self.btn_single_screen.setChecked(True)
         self.btn_single_screen.setFixedSize(120, 26)
         self.btn_single_screen.setFont(QFont("Consolas", 9))
+        self.btn_single_screen.setCursor(Qt.PointingHandCursor)
         self.btn_3screen = QPushButton("3-Screen Split")
         self.btn_3screen.setObjectName("btn_3screen")
         self.btn_3screen.setCheckable(True)
         self.btn_3screen.setFixedSize(120, 26)
         self.btn_3screen.setFont(QFont("Consolas", 9))
+        self.btn_3screen.setCursor(Qt.PointingHandCursor)
         vl_layout.addWidget(self.btn_single_screen)
         vl_layout.addWidget(self.btn_3screen)
 
@@ -298,11 +311,14 @@ class Ui_MainWindow(object):
         self.btn_import_wp.setObjectName("btn_import_wp")
         self.btn_import_wp.setFont(QFont("Segoe UI", 9))
         self.btn_import_wp.setFixedHeight(32)
+        self.btn_import_wp.setCursor(Qt.PointingHandCursor)
+        self.btn_import_wp.setToolTip("Görev dosyasından WP yükle (.csv veya .txt)")
 
         self.btn_clear_waypoints = QPushButton("🗑  Clear Waypoints")
         self.btn_clear_waypoints.setObjectName("btn_clear_waypoints")
         self.btn_clear_waypoints.setFont(QFont("Segoe UI", 9))
         self.btn_clear_waypoints.setFixedHeight(32)
+        self.btn_clear_waypoints.setCursor(Qt.PointingHandCursor)
 
         btn_layout.addWidget(self.btn_import_wp)
         btn_layout.addWidget(self.btn_clear_waypoints)
@@ -312,6 +328,8 @@ class Ui_MainWindow(object):
         self.btn_upload_mission.setObjectName("btn_upload_mission")
         self.btn_upload_mission.setFont(QFont("Segoe UI", 9, QFont.Bold))
         self.btn_upload_mission.setFixedHeight(32)
+        self.btn_upload_mission.setCursor(Qt.PointingHandCursor)
+        self.btn_upload_mission.setToolTip("Koordinatları onayla ve araca yükle")
         mission_lay.addWidget(self.btn_upload_mission)
 
         # Uyumluluk Paneli
@@ -461,6 +479,8 @@ class Ui_MainWindow(object):
         self.btn_mode_switch.setObjectName("btn_mode_switch")
         self.btn_mode_switch.setFont(QFont("Segoe UI", 9, QFont.Bold))
         self.btn_mode_switch.setFixedHeight(32)
+        self.btn_mode_switch.setCursor(Qt.PointingHandCursor)
+        self.btn_mode_switch.setToolTip("Aracın kontrol modunu (Görev <-> Manuel) değiştirir")
         telem_lay.addWidget(self.btn_mode_switch)
 
         # Power Cut uyarısı
@@ -474,13 +494,7 @@ class Ui_MainWindow(object):
         pc_layout.addWidget(self.lbl_power_cut)
         self.frame_power_cut.hide()
         telem_lay.addWidget(self.frame_power_cut)
-
-        # E-STOP butonu
-        self.btn_estop = QPushButton("⛔  E-STOP")
-        self.btn_estop.setObjectName("btn_estop")
-        self.btn_estop.setFont(QFont("Segoe UI", 12, QFont.Bold))
-        self.btn_estop.setFixedHeight(44)
-        telem_lay.addWidget(self.btn_estop)
+        telem_lay.addStretch()
 
         # ── DATA LOGGING & GRAPHS ────────────────────────
         self.logging_content = QWidget()
