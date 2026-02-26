@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1600</width>
+    <height>950</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1200</width>
+    <height>700</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>USV Ground Control Station — Teknofest</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="main_layout">
+    <property name="spacing">
+     <number>6</number>
+    </property>
+    <property name="leftMargin">
+     <number>6</number>
+    </property>
+    <property name="topMargin">
+     <number>6</number>
+    </property>
+    <property name="rightMargin">
+     <number>6</number>
+    </property>
+    <property name="bottomMargin">
+     <number>6</number>
+    </property>
+
+    <!-- ═══ HEADER BAR ═══ -->
+    <item>
+     <widget class="QFrame" name="header_frame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="fixedHeight">
+       <number>56</number>
+      </property>
+      <layout class="QHBoxLayout" name="header_layout">
+       <property name="leftMargin"><number>12</number></property>
+       <property name="topMargin"><number>4</number></property>
+       <property name="rightMargin"><number>12</number></property>
+       <property name="bottomMargin"><number>4</number></property>
+       <item>
+        <layout class="QVBoxLayout" name="title_layout">
+         <property name="spacing"><number>0</number></property>
+         <item>
+          <widget class="QLabel" name="lbl_title">
+           <property name="text"><string>USV Ground Control Station</string></property>
+           <property name="font">
+            <font><family>Segoe UI</family><pointsize>14</pointsize><weight>75</weight><bold>true</bold></font>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbl_subtitle">
+           <property name="text"><string>Autonomous Navigation Monitor</string></property>
+           <property name="font">
+            <font><family>Consolas</family><pointsize>9</pointsize></font>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="header_spacer">
+         <property name="orientation"><enum>Qt::Horizontal</enum></property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_mission_state">
+         <property name="fixedWidth"><number>180</number></property>
+         <property name="fixedHeight"><number>44</number></property>
+         <layout class="QVBoxLayout" name="ms_layout">
+          <property name="spacing"><number>0</number></property>
+          <property name="leftMargin"><number>10</number></property>
+          <property name="topMargin"><number>2</number></property>
+          <property name="rightMargin"><number>10</number></property>
+          <property name="bottomMargin"><number>2</number></property>
+          <item>
+           <widget class="QLabel" name="lbl_mission_state_label">
+            <property name="text"><string>Mission State</string></property>
+            <property name="font"><font><family>Consolas</family><pointsize>8</pointsize></font></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbl_mission_state">
+            <property name="text"><string>STANDBY</string></property>
+            <property name="font"><font><family>Consolas</family><pointsize>12</pointsize><weight>75</weight><bold>true</bold></font></property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_start_mission">
+         <property name="text"><string>  Start Mission</string></property>
+         <property name="fixedWidth"><number>140</number></property>
+         <property name="fixedHeight"><number>36</number></property>
+         <property name="font"><font><family>Segoe UI</family><pointsize>10</pointsize><weight>75</weight><bold>true</bold></font></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lbl_power_status">
+         <property name="text"><string>● ACTIVE</string></property>
+         <property name="font"><font><family>Consolas</family><pointsize>10</pointsize><weight>75</weight><bold>true</bold></font></property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+
+    <!-- ═══ VIDEO LAYOUT SELECTOR ═══ -->
+    <item>
+     <widget class="QFrame" name="frame_video_layout">
+      <property name="fixedHeight"><number>36</number></property>
+      <property name="frameShape"><enum>QFrame::StyledPanel</enum></property>
+      <layout class="QHBoxLayout" name="vl_layout">
+       <property name="leftMargin"><number>12</number></property>
+       <property name="topMargin"><number>4</number></property>
+       <property name="rightMargin"><number>12</number></property>
+       <property name="bottomMargin"><number>4</number></property>
+       <item>
+        <widget class="QLabel" name="lbl_video_layout_title">
+         <property name="text"><string>🖥 Video Layout</string></property>
+         <property name="font"><font><family>Segoe UI</family><pointsize>9</pointsize><weight>75</weight><bold>true</bold></font></property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="vl_spacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_single_screen">
+         <property name="text"><string>Single Screen</string></property>
+         <property name="checkable"><bool>true</bool></property>
+         <property name="checked"><bool>true</bool></property>
+         <property name="fixedWidth"><number>120</number></property>
+         <property name="fixedHeight"><number>26</number></property>
+         <property name="font"><font><family>Consolas</family><pointsize>9</pointsize></font></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_3screen">
+         <property name="text"><string>3-Screen Split</string></property>
+         <property name="checkable"><bool>true</bool></property>
+         <property name="fixedWidth"><number>120</number></property>
+         <property name="fixedHeight"><number>26</number></property>
+         <property name="font"><font><family>Consolas</family><pointsize>9</pointsize></font></property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+
+    <!-- ═══ MAIN CONTENT (Splitters) ═══ -->
+    <item>
+     <widget class="QSplitter" name="splitter_main">
+      <property name="orientation"><enum>Qt::Vertical</enum></property>
+
+      <!-- TOP ROW: Mission | Map | Telemetry -->
+      <widget class="QSplitter" name="splitter_top">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+
+       <!-- MISSION SETUP -->
+       <widget class="QGroupBox" name="group_mission">
+        <property name="title"><string>MISSION SETUP</string></property>
+        <property name="minimumWidth"><number>260</number></property>
+        <property name="maximumWidth"><number>380</number></property>
+        <property name="font"><font><family>Segoe UI</family><pointsize>10</pointsize><weight>75</weight><bold>true</bold></font></property>
+        <layout class="QVBoxLayout" name="mission_outer">
+         <property name="topMargin"><number>20</number></property>
+         <!-- Waypoint entries (WP1-WP4) are created programmatically -->
+         <!-- Target color combo -->
+         <item>
+          <widget class="QComboBox" name="combo_target_color">
+           <property name="font"><font><family>Consolas</family><pointsize>9</pointsize></font></property>
+           <item><property name="text"><string>Red</string></property></item>
+           <item><property name="text"><string>Green</string></property></item>
+           <item><property name="text"><string>Blue</string></property></item>
+           <item><property name="text"><string>Yellow</string></property></item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_upload_mission">
+           <property name="text"><string>⬆  Upload Mission</string></property>
+           <property name="fixedHeight"><number>32</number></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_clear_waypoints">
+           <property name="text"><string>🗑  Clear Waypoints</string></property>
+           <property name="fixedHeight"><number>32</number></property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+
+       <!-- NAVIGATION MAP (Promoted to NavigationMapWidget) -->
+       <widget class="NavigationMapWidget" name="navigation_map">
+        <property name="minimumSize"><size><width>400</width><height>300</height></size></property>
+       </widget>
+
+       <!-- TELEMETRY -->
+       <widget class="QGroupBox" name="group_telemetry">
+        <property name="title"><string>TELEMETRY</string></property>
+        <property name="minimumWidth"><number>240</number></property>
+        <property name="maximumWidth"><number>360</number></property>
+        <property name="font"><font><family>Segoe UI</family><pointsize>10</pointsize><weight>75</weight><bold>true</bold></font></property>
+        <layout class="QVBoxLayout" name="telem_outer">
+         <property name="topMargin"><number>20</number></property>
+         <!-- Telemetry rows created programmatically -->
+         <item>
+          <widget class="QPushButton" name="btn_estop">
+           <property name="text"><string>⛔  E-STOP</string></property>
+           <property name="fixedHeight"><number>48</number></property>
+           <property name="font"><font><family>Segoe UI</family><pointsize>12</pointsize><weight>75</weight><bold>true</bold></font></property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+
+      <!-- BOTTOM ROW: Data Logging | Obstacle Map -->
+      <widget class="QSplitter" name="splitter_bottom">
+       <property name="orientation"><enum>Qt::Horizontal</enum></property>
+
+       <!-- DATA LOGGING -->
+       <widget class="QGroupBox" name="group_data_logging">
+        <property name="title"><string>DATA LOGGING &amp; ANALYSIS</string></property>
+        <property name="font"><font><family>Segoe UI</family><pointsize>10</pointsize><weight>75</weight><bold>true</bold></font></property>
+        <layout class="QVBoxLayout" name="dl_outer">
+         <property name="topMargin"><number>22</number></property>
+         <!-- Recording status + graphs created programmatically with pyqtgraph -->
+        </layout>
+       </widget>
+
+       <!-- OBSTACLE MAP (Promoted to ObstacleMapWidget) -->
+       <widget class="QGroupBox" name="group_obstacle">
+        <property name="title"><string>OBSTACLE MAP</string></property>
+        <property name="minimumWidth"><number>250</number></property>
+        <property name="maximumWidth"><number>450</number></property>
+        <layout class="QVBoxLayout" name="obs_outer">
+         <property name="topMargin"><number>22</number></property>
+         <item>
+          <widget class="ObstacleMapWidget" name="obstacle_map">
+           <property name="minimumSize"><size><width>250</width><height>250</height></size></property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+
+ <!-- ═══ CUSTOM WIDGET PROMOTIONS ═══ -->
+ <customwidgets>
+  <customwidget>
+   <class>NavigationMapWidget</class>
+   <extends>QWidget</extends>
+   <header>custom_widgets</header>
+  </customwidget>
+  <customwidget>
+   <class>ObstacleMapWidget</class>
+   <extends>QWidget</extends>
+   <header>custom_widgets</header>
+  </customwidget>
+ </customwidgets>
+
+ <resources/>
+ <connections/>
+</ui>
