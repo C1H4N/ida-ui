@@ -18,6 +18,7 @@ class NavigationMapWidget(QWidget):
     """
     Premium navigasyon haritası — neon glow waypoint'ler, araç konumu,
     izleme geçmişi ve rota çizer. Glassmorphism overlay'ler.
+    Tüm waypoint'ler + araç merkezli auto-fit görünüm.
     """
 
     def __init__(self, parent=None):
@@ -51,17 +52,53 @@ class NavigationMapWidget(QWidget):
         self.mission_state = state
         self.update()
 
-    def _latlon_to_canvas(self, lat, lon):
+    def _compute_view(self):
+        """Sadece waypoint'lere göre viewport hesapla — araç konumunu dahil ETME.
+        Böylece waypoint'ler sabit kalır ve araç gerçek hareketi görünür."""
+        if len(self.waypoints) > 0:
+            all_points = list(self.waypoints)
+        else:
+            # Waypoint yoksa araç konumunu fallback olarak kullan
+            all_points = [(self.vehicle_lat, self.vehicle_lon)]
+
+        lats = [p[0] for p in all_points]
+        lons = [p[1] for p in all_points]
+
+        center_lat = (min(lats) + max(lats)) / 2
+        center_lon = (min(lons) + max(lons)) / 2
+
+        lat_range = max(lats) - min(lats)
+        lon_range = max(lons) - min(lons)
+
+        # Minimum range to prevent extreme zoom
+        lat_range = max(lat_range, 0.0002)
+        lon_range = max(lon_range, 0.0002)
+
         w = self.width()
         h = self.height()
-        center_lat = self.vehicle_lat
-        center_lon = self.vehicle_lon
-        scale = 100000
+
+        # 15% padding on each side
+        usable_w = w * 0.70
+        usable_h = h * 0.70
+
+        scale_x = usable_w / lon_range if lon_range > 0 else 100000
+        scale_y = usable_h / lat_range if lat_range > 0 else 100000
+        scale = min(scale_x, scale_y)
+
+        return center_lat, center_lon, scale
+
+    def _latlon_to_canvas(self, lat, lon):
+        center_lat, center_lon, scale = self._view_params
+        w = self.width()
+        h = self.height()
         x = w / 2 + (lon - center_lon) * scale
         y = h / 2 - (lat - center_lat) * scale
         return x, y
 
     def paintEvent(self, event):
+        # Pre-compute view parameters for this frame
+        self._view_params = self._compute_view()
+
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
         p.setRenderHint(QPainter.SmoothPixmapTransform)
@@ -70,9 +107,9 @@ class NavigationMapWidget(QWidget):
 
         # ── Deep space background with radial gradient ──
         bg_gradient = QRadialGradient(w / 2, h / 2, max(w, h) * 0.7)
-        bg_gradient.setColorAt(0, QColor("#0f172a"))
-        bg_gradient.setColorAt(0.6, QColor("#0a0f1e"))
-        bg_gradient.setColorAt(1, QColor("#050810"))
+        bg_gradient.setColorAt(0, QColor("#111b33"))
+        bg_gradient.setColorAt(0.6, QColor("#0c1224"))
+        bg_gradient.setColorAt(1, QColor("#080e1e"))
         p.fillRect(0, 0, w, h, QBrush(bg_gradient))
 
         # ── Subtle dot grid ──
@@ -102,21 +139,21 @@ class NavigationMapWidget(QWidget):
                 p.drawLine(int(x1), int(y1), int(x2), int(y2))
 
         # ── Waypoint'ler — neon glow circles ──
-        font_wp = QFont("Segoe UI", 11, QFont.Bold)
-        font_coord = QFont("JetBrains Mono", 7)
+        font_wp = QFont("Segoe UI", 13, QFont.Bold)
+        font_coord = QFont("JetBrains Mono", 9)
         for idx, (lat, lon) in enumerate(self.waypoints):
             x, y = self._latlon_to_canvas(lat, lon)
             is_active = (idx == self.active_waypoint)
 
             # Glow aura
             if is_active:
-                glow = QRadialGradient(x, y, 28)
+                glow = QRadialGradient(x, y, 32)
                 glow.setColorAt(0, QColor(52, 211, 153, 100))
                 glow.setColorAt(0.5, QColor(52, 211, 153, 30))
                 glow.setColorAt(1, QColor(52, 211, 153, 0))
                 p.setPen(Qt.NoPen)
                 p.setBrush(QBrush(glow))
-                p.drawEllipse(QPointF(x, y), 28, 28)
+                p.drawEllipse(QPointF(x, y), 32, 32)
 
             # Outer ring
             fill = QColor("#10b981") if is_active else QColor(99, 102, 241, 120)
@@ -124,20 +161,20 @@ class NavigationMapWidget(QWidget):
 
             p.setPen(QPen(border, 2.5))
             p.setBrush(QBrush(fill))
-            p.drawEllipse(QPointF(x, y), 14, 14)
+            p.drawEllipse(QPointF(x, y), 16, 16)
 
             # Numara
             p.setPen(QColor("#ffffff"))
             p.setFont(font_wp)
-            p.drawText(QRectF(x - 12, y - 10, 24, 20),
+            p.drawText(QRectF(x - 14, y - 12, 28, 24),
                        Qt.AlignCenter, str(idx + 1))
 
             # Koordinatlar
             p.setFont(font_coord)
-            p.setPen(QColor(165, 180, 252, 180))
-            p.drawText(QRectF(x - 45, y + 18, 90, 14),
+            p.setPen(QColor(165, 180, 252, 200))
+            p.drawText(QRectF(x - 55, y + 20, 110, 16),
                        Qt.AlignCenter, f"{lat:.6f}")
-            p.drawText(QRectF(x - 45, y + 30, 90, 14),
+            p.drawText(QRectF(x - 55, y + 34, 110, 16),
                        Qt.AlignCenter, f"{lon:.6f}")
 
         # ── Track history — gradient trail ──
@@ -191,7 +228,7 @@ class NavigationMapWidget(QWidget):
         p.restore()
 
         # ── Glassmorphism Overlay — Vehicle Position ──
-        overlay_w, overlay_h = 190, 82
+        overlay_w, overlay_h = 220, 96
         p.setPen(Qt.NoPen)
         p.setBrush(QColor(8, 12, 24, 210))
         p.drawRoundedRect(10, 10, overlay_w, overlay_h, 12, 12)
@@ -200,24 +237,24 @@ class NavigationMapWidget(QWidget):
         p.setBrush(Qt.NoBrush)
         p.drawRoundedRect(10, 10, overlay_w, overlay_h, 12, 12)
 
-        p.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        p.setFont(QFont("Segoe UI", 11, QFont.Bold))
         p.setPen(QColor(165, 180, 252, 180))
-        p.drawText(18, 28, "VEHICLE POSITION")
+        p.drawText(18, 30, "ARAÇ KONUMU")
 
-        p.setFont(QFont("JetBrains Mono", 10, QFont.Bold))
+        p.setFont(QFont("JetBrains Mono", 12, QFont.Bold))
         p.setPen(QColor("#6ee7b7"))
-        p.drawText(18, 46, f"{self.vehicle_lat:.7f}°N")
-        p.drawText(18, 62, f"{self.vehicle_lon:.7f}°W")
+        p.drawText(18, 52, f"{self.vehicle_lat:.7f}°N")
+        p.drawText(18, 72, f"{self.vehicle_lon:.7f}°W")
         p.setPen(QColor("#fbbf24"))
-        p.drawText(18, 80, f"HDG: {self.vehicle_heading:.1f}°")
+        p.drawText(18, 92, f"YÖN: {self.vehicle_heading:.1f}°")
 
         # ── Glassmorphism Overlay — Mission State (sağ üst) ──
         state_text = self.mission_state
-        p.setFont(QFont("Segoe UI", 11, QFont.Bold))
+        p.setFont(QFont("Segoe UI", 13, QFont.Bold))
         fm = p.fontMetrics()
         tw = fm.horizontalAdvance(state_text)
         box_w = tw + 28
-        box_h = 32
+        box_h = 36
         box_x = w - box_w - 10
         box_y = 10
 
@@ -239,7 +276,7 @@ class NavigationMapWidget(QWidget):
             state_color = QColor("#67e8f9")
 
         p.setPen(state_color)
-        p.drawText(box_x + 14, box_y + 22, state_text)
+        p.drawText(box_x + 14, box_y + 24, state_text)
 
         p.end()
 
@@ -307,7 +344,7 @@ class ObstacleMapWidget(QWidget):
             p.drawEllipse(QPointF(cx, cy), r, r)
             # Label
             p.setPen(QColor(129, 140, 248, 160))
-            p.setFont(QFont("Segoe UI", 9, QFont.Bold))
+            p.setFont(QFont("Segoe UI", 11, QFont.Bold))
             p.drawText(int(cx + r + 5), int(cy - 3), f"{radius}m")
 
         # ── Engeller — neon dots ──
@@ -376,7 +413,7 @@ class ObstacleMapWidget(QWidget):
         p.restore()
 
         # ── Glassmorphism Legend ──
-        legend_w, legend_h = 100, 90
+        legend_w, legend_h = 120, 100
         p.setPen(Qt.NoPen)
         p.setBrush(QColor(8, 12, 24, 200))
         p.drawRoundedRect(10, 10, legend_w, legend_h, 10, 10)
@@ -384,22 +421,22 @@ class ObstacleMapWidget(QWidget):
         p.setBrush(Qt.NoBrush)
         p.drawRoundedRect(10, 10, legend_w, legend_h, 10, 10)
 
-        p.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        p.setFont(QFont("Segoe UI", 12, QFont.Bold))
         p.setPen(QColor("#c7d2fe"))
-        p.drawText(18, 28, "Cost Map")
+        p.drawText(18, 30, "Maliyet Haritası")
 
         legend_items = [
-            (QColor("#34d399"), "Low"),
-            (QColor("#fbbf24"), "Medium"),
-            (QColor("#f87171"), "High"),
+            (QColor("#34d399"), "Düşük"),
+            (QColor("#fbbf24"), "Orta"),
+            (QColor("#f87171"), "Yüksek"),
         ]
         for i, (color, label) in enumerate(legend_items):
-            y = 38 + i * 18
+            y = 40 + i * 20
             p.setPen(Qt.NoPen)
             p.setBrush(QBrush(color))
-            p.drawRoundedRect(18, y, 14, 14, 3, 3)
+            p.drawRoundedRect(18, y, 16, 16, 3, 3)
             p.setPen(QColor(165, 180, 252, 160))
-            p.setFont(QFont("Segoe UI", 9))
-            p.drawText(36, y + 11, label)
+            p.setFont(QFont("Segoe UI", 11))
+            p.drawText(40, y + 13, label)
 
         p.end()

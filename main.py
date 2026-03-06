@@ -36,7 +36,7 @@ from custom_widgets import NavigationMapWidget, ObstacleMapWidget
 # ═══════════════════════════════════════════════════════════
 # pyqtgraph Genel Ayarlar (koyu tema uyumlu)
 # ═══════════════════════════════════════════════════════════
-pg.setConfigOptions(antialias=True, background="#080c18", foreground="#a5b4fc")
+pg.setConfigOptions(antialias=True, background="#0c1224", foreground="#a5b4fc")
 
 
 class GCSMainWindow(QMainWindow):
@@ -62,7 +62,7 @@ class GCSMainWindow(QMainWindow):
         self.mission_started = False
         self.is_powered = True
         self.active_waypoint = 0
-        self.mission_state = "STANDBY"
+        self.mission_state = "BEKLEMEDE"
         self.competition_time = 20 * 60  # 20 dakika (saniye)
         self.failsafe_active = False
         self.no_data_counter = 0
@@ -98,10 +98,10 @@ class GCSMainWindow(QMainWindow):
             "gps_fix": "RTK Fixed",
             "hdop": 0.8,
             "telem_link": 98,
-            "rc_link": "Connected",
+            "rc_link": "Bağlı",
             "rssi": -65,
             "packet_loss": 0.3,
-            "mode": "MANUAL",
+            "mode": "MANUEL",
             "power_cut": False,
         }
 
@@ -142,7 +142,10 @@ class GCSMainWindow(QMainWindow):
         self._update_map()
         self._update_mission_state_display()
 
-        self.statusBar().showMessage("Sistem hazır — Waypoint'leri girin ve görev yükleyin")
+        # ── Konsol log sistemi ──────────────────────────
+        self._log_to_console("Sistem başlatıldı — Waypoint'leri girin ve görevi yükleyin")
+
+        self.statusBar().showMessage("Sistem hazır — Waypoint'leri girin ve görevi yükleyin")
 
     # ═══════════════════════════════════════════════════════
     # GRAFİK İNİTALİZASYON (pyqtgraph)
@@ -152,18 +155,18 @@ class GCSMainWindow(QMainWindow):
 
         # Speed Graph
         self.plot_speed = pg.PlotWidget()
-        self.plot_speed.setLabel("left", "m/s", **{"font-size": "11pt", "color": "#a5b4fc"})
-        self.plot_speed.setLabel("bottom", "t", **{"font-size": "11pt", "color": "#a5b4fc"})
+        self.plot_speed.setLabel("left", "m/s", **{"font-size": "12pt", "color": "#a5b4fc"})
+        self.plot_speed.setLabel("bottom", "t", **{"font-size": "12pt", "color": "#a5b4fc"})
         self.plot_speed.setYRange(0, 3)
         self.plot_speed.showGrid(x=True, y=True, alpha=0.08)
-        self.plot_speed.addLegend(offset=(5, 5), labelTextSize="10pt")
+        self.plot_speed.addLegend(offset=(5, 5), labelTextSize="12pt")
         self.plot_speed.getAxis("left").setPen(pg.mkPen("#6366f1", width=1))
         self.plot_speed.getAxis("bottom").setPen(pg.mkPen("#6366f1", width=1))
         self.curve_speed = self.plot_speed.plot(
-            pen=pg.mkPen("#818cf8", width=2.5), name="Speed"
+            pen=pg.mkPen("#818cf8", width=2.5), name="Hız"
         )
         self.curve_speed_target = self.plot_speed.plot(
-            pen=pg.mkPen("#34d399", width=2.5, style=Qt.DashLine), name="Target"
+            pen=pg.mkPen("#34d399", width=2.5, style=Qt.DashLine), name="Hedef"
         )
         self._replace_placeholder(
             self.ui.frame_graph_speed, self.ui.graph_speed_placeholder, self.plot_speed
@@ -171,18 +174,18 @@ class GCSMainWindow(QMainWindow):
 
         # Heading Graph
         self.plot_heading = pg.PlotWidget()
-        self.plot_heading.setLabel("left", "°", **{"font-size": "11pt", "color": "#a5b4fc"})
-        self.plot_heading.setLabel("bottom", "t", **{"font-size": "11pt", "color": "#a5b4fc"})
+        self.plot_heading.setLabel("left", "°", **{"font-size": "12pt", "color": "#a5b4fc"})
+        self.plot_heading.setLabel("bottom", "t", **{"font-size": "12pt", "color": "#a5b4fc"})
         self.plot_heading.setYRange(0, 360)
         self.plot_heading.showGrid(x=True, y=True, alpha=0.08)
-        self.plot_heading.addLegend(offset=(5, 5), labelTextSize="10pt")
+        self.plot_heading.addLegend(offset=(5, 5), labelTextSize="12pt")
         self.plot_heading.getAxis("left").setPen(pg.mkPen("#6366f1", width=1))
         self.plot_heading.getAxis("bottom").setPen(pg.mkPen("#6366f1", width=1))
         self.curve_heading = self.plot_heading.plot(
-            pen=pg.mkPen("#fbbf24", width=2.5), name="Heading"
+            pen=pg.mkPen("#fbbf24", width=2.5), name="Yön"
         )
         self.curve_heading_target = self.plot_heading.plot(
-            pen=pg.mkPen("#34d399", width=2.5, style=Qt.DashLine), name="Target"
+            pen=pg.mkPen("#34d399", width=2.5, style=Qt.DashLine), name="Hedef"
         )
         self._replace_placeholder(
             self.ui.frame_graph_heading, self.ui.graph_heading_placeholder, self.plot_heading
@@ -190,18 +193,18 @@ class GCSMainWindow(QMainWindow):
 
         # Thruster Graph
         self.plot_thruster = pg.PlotWidget()
-        self.plot_thruster.setLabel("left", "%", **{"font-size": "11pt", "color": "#a5b4fc"})
-        self.plot_thruster.setLabel("bottom", "t", **{"font-size": "11pt", "color": "#a5b4fc"})
+        self.plot_thruster.setLabel("left", "%", **{"font-size": "12pt", "color": "#a5b4fc"})
+        self.plot_thruster.setLabel("bottom", "t", **{"font-size": "12pt", "color": "#a5b4fc"})
         self.plot_thruster.setYRange(-100, 100)
         self.plot_thruster.showGrid(x=True, y=True, alpha=0.08)
-        self.plot_thruster.addLegend(offset=(5, 5), labelTextSize="10pt")
+        self.plot_thruster.addLegend(offset=(5, 5), labelTextSize="12pt")
         self.plot_thruster.getAxis("left").setPen(pg.mkPen("#6366f1", width=1))
         self.plot_thruster.getAxis("bottom").setPen(pg.mkPen("#6366f1", width=1))
         self.curve_thruster_l = self.plot_thruster.plot(
-            pen=pg.mkPen("#a78bfa", width=2.5), name="Left"
+            pen=pg.mkPen("#a78bfa", width=2.5), name="Sol"
         )
         self.curve_thruster_r = self.plot_thruster.plot(
-            pen=pg.mkPen("#f472b6", width=2.5), name="Right"
+            pen=pg.mkPen("#f472b6", width=2.5), name="Sağ"
         )
         self._replace_placeholder(
             self.ui.frame_graph_thruster, self.ui.graph_thruster_placeholder, self.plot_thruster
@@ -248,24 +251,77 @@ class GCSMainWindow(QMainWindow):
             lambda: self._set_video_layout("split-3")
         )
 
+        # Console toggle
+        self.ui.btn_console_toggle.toggled.connect(self._on_console_toggle)
+        self.ui.btn_clear_console.clicked.connect(self._on_clear_console)
+
+        # Waypoint değişince haritayı güncelle
+        for edit_lat, edit_lon in self.ui.wp_entries:
+            edit_lat.textChanged.connect(self._on_wp_changed)
+            edit_lon.textChanged.connect(self._on_wp_changed)
+
+    # ═══════════════════════════════════════════════════════
+    # KONSOL / LOG SİSTEMİ
+    # ═══════════════════════════════════════════════════════
+    def _log_to_console(self, message, level="INFO"):
+        """Konsol paneline log mesajı ekler."""
+        ts = datetime.now().strftime("%H:%M:%S")
+        color_map = {
+            "INFO": "#a5b4fc",
+            "WARN": "#fbbf24",
+            "ERROR": "#f87171",
+            "SUCCESS": "#4ade80",
+        }
+        color = color_map.get(level, "#a5b4fc")
+        html = f'<span style="color: #475569;">[{ts}]</span> <span style="color: {color}; font-weight: bold;">[{level}]</span> <span style="color: #e0e7ff;">{message}</span>'
+        self.ui.console_text.append(html)
+        # Auto-scroll to bottom
+        scrollbar = self.ui.console_text.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
+
+    def _on_console_toggle(self, checked):
+        """Konsol panelini aç/kapa."""
+        if checked:
+            self.ui.frame_console.show()
+            self.ui.btn_console_toggle.setText("🖥  Konsol ▼")
+        else:
+            self.ui.frame_console.hide()
+            self.ui.btn_console_toggle.setText("🖥  Konsol ▲")
+
+    def _on_clear_console(self):
+        """Konsol içeriğini temizle."""
+        self.ui.console_text.clear()
+        self._log_to_console("Konsol temizlendi", "INFO")
+
     # ═══════════════════════════════════════════════════════
     # BUTON İŞLEYİCİLER (SLOT'lar)
     # ═══════════════════════════════════════════════════════
+    def _on_wp_changed(self):
+        """Waypoint değiştiğinde haritayı güncelle."""
+        if not self.mission_started:
+            self._update_map()
+
     def _on_start_mission(self):
         if self.mission_started:
             return
             
         if not self.ui.check_wifi.isChecked() or not self.ui.check_race_mode.isChecked():
-            QMessageBox.warning(self, "Uyarı", "Lütfen PRE-FLIGHT COMPATIBILITY panelindeki tüm onayları verin!")
+            QMessageBox.warning(self, "Uyarı", "Lütfen UÇUŞ ÖNCESİ KONTROL panelindeki tüm onayları verin!")
+            self._log_to_console("Görev başlatılamadı: Uçuş öncesi kontrol eksik", "WARN")
             return
             
         wp = self._get_waypoints()
         if not wp:
             QMessageBox.warning(self, "Hata", "Geçerli bir waypoint yüklenmedi!\nKoordinatların formatı tam ondalıklı (örn. 37.8043514) olmalı ve noktadan sonra 7 hane bulundurmalıdır.")
+            self._log_to_console("Görev başlatılamadı: Geçerli waypoint bulunamadı", "ERROR")
             return
 
+        # Araç başlangıç konumunu ilk waypoint'e ayarla
+        self.vehicle["lat"] = wp[0][0]
+        self.vehicle["lon"] = wp[0][1]
+
         self.mission_started = True
-        self.vehicle["mode"] = "MISSION"
+        self.vehicle["mode"] = "GÖREV"
         self.mission_state = "WP1 → WP2"
         self.active_waypoint = 0
         self._update_mission_state_display()
@@ -273,6 +329,8 @@ class GCSMainWindow(QMainWindow):
         self._set_mission_lock(True)
         self.ui.btn_start_mission.setEnabled(False)
         self._start_csv_logging()
+        self._log_to_console(f"Görev başlatıldı — {len(wp)} waypoint yüklendi", "SUCCESS")
+        self._log_to_console(f"Araç konumu WP1'e taşındı: ({wp[0][0]:.7f}, {wp[0][1]:.7f})", "INFO")
         self.statusBar().showMessage("✓ Görev başlatıldı — Araç otonom çalışıyor")
 
     def _on_import_wp(self):
@@ -280,7 +338,7 @@ class GCSMainWindow(QMainWindow):
             return
         
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "Görev Dosyası Seç", "", "Text/CSV Files (*.txt *.csv);;All Files (*)"
+            self, "Görev Dosyası Seç", "", "Text/CSV Dosyaları (*.txt *.csv);;Tüm Dosyalar (*)"
         )
         if not file_path:
             return
@@ -301,18 +359,23 @@ class GCSMainWindow(QMainWindow):
                     self.ui.wp_entries[idx][1].setText(parts[1].strip())
                     idx += 1
             
+            self._log_to_console(f"Dosyadan {idx} waypoint okundu: {os.path.basename(file_path)}", "SUCCESS")
             self.statusBar().showMessage(f"✓ Dosyadan {idx} waypoint okundu")
             if idx == 0:
                 QMessageBox.warning(self, "Uyarı", "Seçilen dosyadan hiç geçerli koordinat satırı okunamadı.")
+                self._log_to_console("Dosyada geçerli koordinat bulunamadı", "WARN")
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Dosya okunurken hata oluştu:\n{e}")
+            self._log_to_console(f"Dosya okuma hatası: {e}", "ERROR")
 
     def _on_upload_mission(self):
         if self.mission_started:
             return
         ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
-        self.ui.lbl_upload_status.setText(f"✓ {ts} UTC'de yüklendi")
+        wp = self._get_waypoints()
+        self.ui.lbl_upload_status.setText(f"✓ {ts} UTC'de yüklendi ({len(wp)} WP)")
         self.ui.lbl_upload_status.show()
+        self._log_to_console(f"Görev yüklendi — {len(wp)} waypoint, {ts} UTC", "SUCCESS")
         self.statusBar().showMessage("✓ Görev waypoint'leri başarıyla yüklendi")
 
     def _on_clear_waypoints(self):
@@ -322,37 +385,39 @@ class GCSMainWindow(QMainWindow):
             edit_lat.clear()
             edit_lon.clear()
         self.ui.lbl_upload_status.hide()
+        self._log_to_console("Waypoint'ler temizlendi", "INFO")
         self.statusBar().showMessage("Waypoint'ler temizlendi")
 
     def _on_emergency_stop(self):
         self.mission_started = False
         self.is_powered = False
-        self.vehicle["mode"] = "FAILSAFE"
+        self.vehicle["mode"] = "GÜVENLİK"
         self.vehicle["power_cut"] = True
         self.vehicle["ground_speed"] = 0
         self.vehicle["thruster_left"] = 0
         self.vehicle["thruster_right"] = 0
-        self.mission_state = "E-STOP ACTIVATED"
+        self.mission_state = "ACİL DURDURMA AKTİF"
         self._update_mission_state_display()
         self.ui.frame_power_cut.show()
-        self.ui.lbl_power_status.setText("● POWER CUT")
+        self.ui.lbl_power_status.setText("● GÜÇ KESİMİ")
         self.ui.lbl_power_status.setStyleSheet("color: #ef4444; padding: 0 8px;")
         self.ui.btn_start_mission.setEnabled(False)
+        self._log_to_console("ACİL DURDURMA aktif edildi — Güç kesildi!", "ERROR")
         self.statusBar().showMessage("⚠ ACİL DURDURMA AKTİF — Güç kesildi!")
 
         QMessageBox.critical(
             self, "ACİL DURDURMA",
-            "E-STOP aktif edildi!\nAraç güç kesimi durumunda.",
+            "Acil durdurma aktif edildi!\nAraç güç kesimi durumunda.",
         )
 
     def _on_mode_switch(self):
         """Manuel ↔ Otonom mod geçişi."""
         current = self.vehicle["mode"]
-        if current == "MANUAL":
-            new_mode = "MISSION"
-            msg = "Otonom moda geçilsin mi?\nAraç waypoint rotasini izleyecek."
+        if current == "MANUEL":
+            new_mode = "GÖREV"
+            msg = "Otonom moda geçilsin mi?\nAraç waypoint rotasını izleyecek."
         else:
-            new_mode = "MANUAL"
+            new_mode = "MANUEL"
             msg = "Manuel moda geçilsin mi?\nAraç kontrolü operatöre geçecek."
 
         reply = QMessageBox.question(
@@ -364,16 +429,17 @@ class GCSMainWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             self.vehicle["mode"] = new_mode
             self._update_telemetry_display()
-            if new_mode == "MISSION":
-                self.ui.btn_mode_switch.setText("⇄  Switch to MANUAL")
+            if new_mode == "GÖREV":
+                self.ui.btn_mode_switch.setText("⇄  Manuel Moda Geç")
                 self.ui.btn_mode_switch.setStyleSheet(
                     "background-color: #1e3a5f; color: #60a5fa;"
                 )
             else:
-                self.ui.btn_mode_switch.setText("⇄  Switch to MISSION")
+                self.ui.btn_mode_switch.setText("⇄  Otonom Moda Geç")
                 self.ui.btn_mode_switch.setStyleSheet(
                     "background-color: #1a2e1a; color: #4ade80;"
                 )
+            self._log_to_console(f"Mod değiştirildi: {new_mode}", "SUCCESS")
             self.statusBar().showMessage(f"✓ Mod değiştirildi: {new_mode}")
 
     def _set_video_layout(self, layout):
@@ -410,7 +476,7 @@ class GCSMainWindow(QMainWindow):
             return
 
         # Görev tamamlandıysa simülasyonu durdur
-        if self.mission_state == "MISSION COMPLETE":
+        if self.mission_state == "GÖREV TAMAMLANDI":
             return
 
         # Waypoint'leri oku
@@ -434,15 +500,19 @@ class GCSMainWindow(QMainWindow):
         else:
             # Waypoint'e ulaşıldı
             if self.active_waypoint < len(waypoints) - 1:
+                old_wp = self.active_waypoint + 1
                 self.active_waypoint += 1
-                self.mission_state = f"WP{self.active_waypoint} → WP{self.active_waypoint + 1}"
+                new_wp = self.active_waypoint + 1
+                self.mission_state = f"WP{old_wp} → WP{new_wp}"
+                self._log_to_console(f"Waypoint {old_wp} ulaşıldı → WP{new_wp}'e yönleniyor", "SUCCESS")
             else:
-                self.mission_state = "MISSION COMPLETE"
+                self.mission_state = "GÖREV TAMAMLANDI"
                 v["ground_speed"] = 0.0
                 v["thruster_left"] = 0.0
                 v["thruster_right"] = 0.0
                 self._update_telemetry_display()
                 self._update_mission_progress()
+                self._log_to_console("Görev tamamlandı! Tüm waypoint'lere ulaşıldı.", "SUCCESS")
             self._update_mission_state_display()
             return
 
@@ -563,7 +633,7 @@ class GCSMainWindow(QMainWindow):
 
         tl["rc_link"].setText(v["rc_link"])
         if self.failsafe_active:
-            tl["rc_link"].setText("LOST")
+            tl["rc_link"].setText("KOPTU")
             tl["rc_link"].setStyleSheet("color: #f87171;")
         else:
             tl["rc_link"].setStyleSheet("color: #f1f5f9;")
@@ -610,9 +680,9 @@ class GCSMainWindow(QMainWindow):
         # Vehicle Mode rengi
         mode = v["mode"]
         mode_colors = {
-            "MISSION": "#4ade80",
-            "MANUAL": "#60a5fa",
-            "FAILSAFE": "#f87171",
+            "GÖREV": "#4ade80",
+            "MANUEL": "#60a5fa",
+            "GÜVENLİK": "#f87171",
         }
         self.ui.lbl_vehicle_mode.setText(mode)
         self.ui.lbl_vehicle_mode.setStyleSheet(
@@ -621,7 +691,7 @@ class GCSMainWindow(QMainWindow):
 
         # Target Detection (simülasyon)
         tl["target_status"].setText(
-            "DETECTED" if self.mission_started else "WAITING"
+            "TESPİT EDİLDİ" if self.mission_started else "BEKLENİYOR"
         )
         if self.mission_started:
             tl["target_status"].setStyleSheet("color: #4ade80;")
@@ -668,17 +738,17 @@ class GCSMainWindow(QMainWindow):
 
         lbl.setText(state)
 
-        if state == "STANDBY":
+        if state == "BEKLEMEDE":
             lbl.setStyleSheet("color: #94a3b8;")
             frame.setStyleSheet(
                 "background-color: #0f172a; border: 2px solid #475569; border-radius: 4px;"
             )
-        elif "E-STOP" in state:
+        elif "ACİL" in state or "E-STOP" in state:
             lbl.setStyleSheet("color: #f87171;")
             frame.setStyleSheet(
                 "background-color: #450a0a; border: 2px solid #dc2626; border-radius: 4px;"
             )
-        elif "COMPLETE" in state:
+        elif "TAMAMLANDI" in state or "COMPLETE" in state:
             lbl.setStyleSheet("color: #4ade80;")
             frame.setStyleSheet(
                 "background-color: #052e16; border: 2px solid #16a34a; border-radius: 4px;"
@@ -709,6 +779,7 @@ class GCSMainWindow(QMainWindow):
             "battery_pct", "cpu_temp", "gps_fix", "hdop",
             "telem_link", "rssi", "packet_loss", "mode", "mission_state",
         ])
+        self._log_to_console(f"CSV kayıt başladı: {os.path.basename(filepath)}", "INFO")
         self.statusBar().showMessage(f"📁 CSV kayıt başladı: {filepath}")
 
     def _log_csv_row(self):
@@ -739,16 +810,18 @@ class GCSMainWindow(QMainWindow):
 
         if link_lost and not self.failsafe_active:
             self.failsafe_active = True
-            self.vehicle["mode"] = "FAILSAFE"
-            self.mission_state = "FAILSAFE — LINK LOST"
+            self.vehicle["mode"] = "GÜVENLİK"
+            self.mission_state = "GÜVENLİK — BAĞLANTI KOPTU"
             self._update_mission_state_display()
             self.ui.frame_failsafe.show()
             self.ui.btn_mode_switch.setEnabled(False)
-            self.statusBar().showMessage("⚠ FAILSAFE — İletişim koptu!")
+            self._log_to_console("FAILSAFE — İletişim koptu!", "ERROR")
+            self.statusBar().showMessage("⚠ GÜVENLİK MODU — İletişim koptu!")
         elif not link_lost and self.failsafe_active:
             self.failsafe_active = False
             self.ui.frame_failsafe.hide()
             self.ui.btn_mode_switch.setEnabled(True)
+            self._log_to_console("İletişim geri geldi", "SUCCESS")
             self.statusBar().showMessage("✓ İletişim geri geldi")
 
     # ── GÖREV İLERLEME ───────────────────────────────────
@@ -764,7 +837,7 @@ class GCSMainWindow(QMainWindow):
         current = min(self.active_waypoint + 1, total)
         pct = round((self.active_waypoint / total) * 100) if total > 0 else 0
 
-        if self.mission_state == "MISSION COMPLETE":
+        if self.mission_state == "GÖREV TAMAMLANDI":
             current = total
             pct = 100
 
@@ -808,8 +881,8 @@ class GCSMainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
 
-    # Uygulama geneli font — premium
-    font = QFont("Segoe UI", 10)
+    # Uygulama geneli font — büyütülmüş
+    font = QFont("Segoe UI", 12)
     app.setFont(font)
 
     window = GCSMainWindow()
