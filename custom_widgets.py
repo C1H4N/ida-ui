@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-custom_widgets.py — Özel QPainter tabanlı widget'lar
-Navigation Map ve Obstacle/Cost Map canvas widget'ları.
-Qt Designer'da QWidget olarak yerleştirilip "Promote" edilir.
+custom_widgets.py — Premium QPainter Widget'ları
+Navigation Map ve Obstacle/Cost Map — tamamen yenilenmiş tasarım.
 """
 
 import math
@@ -10,30 +9,29 @@ import numpy as np
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import (
-    QPainter, QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath
+    QPainter, QPen, QBrush, QColor, QFont, QPolygonF, QPainterPath,
+    QRadialGradient, QLinearGradient, QConicalGradient
 )
 
 
 class NavigationMapWidget(QWidget):
     """
-    Merkezi navigasyon haritası — waypoint'ler, araç konumu,
-    izleme geçmişi (track history) ve rota çizer.
+    Premium navigasyon haritası — neon glow waypoint'ler, araç konumu,
+    izleme geçmişi ve rota çizer. Glassmorphism overlay'ler.
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(400, 300)
 
-        # Veri
         self.vehicle_lat = 37.8043514
         self.vehicle_lon = -122.4101440
         self.vehicle_heading = 45.0
-        self.waypoints = []          # list of (lat, lon)
+        self.waypoints = []
         self.active_waypoint = 0
-        self.track_history = []      # list of (lat, lon)
+        self.track_history = []
         self.mission_state = "STANDBY"
 
-    # ── Veri güncelleme slotları ────────────────────────
     def set_vehicle_state(self, lat, lon, heading):
         self.vehicle_lat = lat
         self.vehicle_lon = lon
@@ -53,7 +51,6 @@ class NavigationMapWidget(QWidget):
         self.mission_state = state
         self.update()
 
-    # ── Koordinat dönüşümü ──────────────────────────────
     def _latlon_to_canvas(self, lat, lon):
         w = self.width()
         h = self.height()
@@ -64,131 +61,201 @@ class NavigationMapWidget(QWidget):
         y = h / 2 - (lat - center_lat) * scale
         return x, y
 
-    # ── Çizim ───────────────────────────────────────────
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
         w = self.width()
         h = self.height()
 
-        # Arka plan
-        p.fillRect(0, 0, w, h, QColor("#0f172a"))
+        # ── Deep space background with radial gradient ──
+        bg_gradient = QRadialGradient(w / 2, h / 2, max(w, h) * 0.7)
+        bg_gradient.setColorAt(0, QColor("#0f172a"))
+        bg_gradient.setColorAt(0.6, QColor("#0a0f1e"))
+        bg_gradient.setColorAt(1, QColor("#050810"))
+        p.fillRect(0, 0, w, h, QBrush(bg_gradient))
 
-        # Grid
-        p.setPen(QPen(QColor("#1e293b"), 1))
-        for i in range(0, w, 40):
-            p.drawLine(i, 0, i, h)
-        for i in range(0, h, 40):
-            p.drawLine(0, i, w, i)
+        # ── Subtle dot grid ──
+        p.setPen(QPen(QColor(99, 102, 241, 20), 1))
+        for i in range(0, w, 50):
+            for j in range(0, h, 50):
+                p.drawEllipse(QPointF(i, j), 1.5, 1.5)
 
-        # Rota çizgisi (waypoint'ler arası)
+        # ── Rota çizgisi (neon glow) ──
         if len(self.waypoints) > 1:
-            pen = QPen(QColor("#3b82f6"), 2, Qt.DashLine)
+            # Glow layer
+            pen_glow = QPen(QColor(99, 102, 241, 40), 8)
+            pen_glow.setCapStyle(Qt.RoundCap)
+            p.setPen(pen_glow)
+            for i in range(len(self.waypoints) - 1):
+                x1, y1 = self._latlon_to_canvas(*self.waypoints[i])
+                x2, y2 = self._latlon_to_canvas(*self.waypoints[i + 1])
+                p.drawLine(int(x1), int(y1), int(x2), int(y2))
+
+            # Core line
+            pen = QPen(QColor(129, 140, 248, 180), 2, Qt.DashLine)
+            pen.setDashPattern([8, 4])
             p.setPen(pen)
             for i in range(len(self.waypoints) - 1):
                 x1, y1 = self._latlon_to_canvas(*self.waypoints[i])
                 x2, y2 = self._latlon_to_canvas(*self.waypoints[i + 1])
                 p.drawLine(int(x1), int(y1), int(x2), int(y2))
 
-        # Waypoint'ler
-        mono = QFont("Consolas", 9, QFont.Bold)
-        mono_small = QFont("Consolas", 7)
+        # ── Waypoint'ler — neon glow circles ──
+        font_wp = QFont("Segoe UI", 11, QFont.Bold)
+        font_coord = QFont("JetBrains Mono", 7)
         for idx, (lat, lon) in enumerate(self.waypoints):
             x, y = self._latlon_to_canvas(lat, lon)
             is_active = (idx == self.active_waypoint)
-            fill = QColor("#10b981") if is_active else QColor("#475569")
-            border = QColor("#34d399") if is_active else QColor("#64748b")
 
-            p.setPen(QPen(border, 2))
+            # Glow aura
+            if is_active:
+                glow = QRadialGradient(x, y, 28)
+                glow.setColorAt(0, QColor(52, 211, 153, 100))
+                glow.setColorAt(0.5, QColor(52, 211, 153, 30))
+                glow.setColorAt(1, QColor(52, 211, 153, 0))
+                p.setPen(Qt.NoPen)
+                p.setBrush(QBrush(glow))
+                p.drawEllipse(QPointF(x, y), 28, 28)
+
+            # Outer ring
+            fill = QColor("#10b981") if is_active else QColor(99, 102, 241, 120)
+            border = QColor("#6ee7b7") if is_active else QColor("#818cf8")
+
+            p.setPen(QPen(border, 2.5))
             p.setBrush(QBrush(fill))
-            p.drawEllipse(QPointF(x, y), 10, 10)
+            p.drawEllipse(QPointF(x, y), 14, 14)
 
             # Numara
             p.setPen(QColor("#ffffff"))
-            p.setFont(mono)
-            p.drawText(QRectF(x - 10, y - 8, 20, 16),
+            p.setFont(font_wp)
+            p.drawText(QRectF(x - 12, y - 10, 24, 20),
                        Qt.AlignCenter, str(idx + 1))
 
             # Koordinatlar
-            p.setFont(mono_small)
-            p.setPen(QColor("#94a3b8"))
-            p.drawText(QRectF(x - 40, y + 14, 80, 14),
+            p.setFont(font_coord)
+            p.setPen(QColor(165, 180, 252, 180))
+            p.drawText(QRectF(x - 45, y + 18, 90, 14),
                        Qt.AlignCenter, f"{lat:.6f}")
-            p.drawText(QRectF(x - 40, y + 26, 80, 14),
+            p.drawText(QRectF(x - 45, y + 30, 90, 14),
                        Qt.AlignCenter, f"{lon:.6f}")
 
-        # Track history
+        # ── Track history — gradient trail ──
         if len(self.track_history) > 1:
-            pen = QPen(QColor(6, 182, 212, 150), 2)
-            p.setPen(pen)
-            for i in range(len(self.track_history) - 1):
+            total = len(self.track_history)
+            for i in range(total - 1):
+                alpha = int(40 + (i / total) * 180)
+                pen = QPen(QColor(99, 102, 241, alpha), 2.5)
+                pen.setCapStyle(Qt.RoundCap)
+                p.setPen(pen)
                 x1, y1 = self._latlon_to_canvas(*self.track_history[i])
                 x2, y2 = self._latlon_to_canvas(*self.track_history[i + 1])
                 p.drawLine(int(x1), int(y1), int(x2), int(y2))
 
-        # Araç (vehicle)
+        # ── Araç — premium design ──
         vx, vy = self._latlon_to_canvas(self.vehicle_lat, self.vehicle_lon)
+
+        # Outer glow ring
+        glow = QRadialGradient(vx, vy, 35)
+        glow.setColorAt(0, QColor(245, 158, 11, 60))
+        glow.setColorAt(0.6, QColor(245, 158, 11, 15))
+        glow.setColorAt(1, QColor(245, 158, 11, 0))
+        p.setPen(Qt.NoPen)
+        p.setBrush(QBrush(glow))
+        p.drawEllipse(QPointF(vx, vy), 35, 35)
+
+        # Pulsing range circle
+        p.setPen(QPen(QColor(245, 158, 11, 40), 1.5))
+        p.setBrush(Qt.NoBrush)
+        p.drawEllipse(QPointF(vx, vy), 26, 26)
+
         p.save()
         p.translate(vx, vy)
         p.rotate(self.vehicle_heading)
 
-        # Ok şekli
+        # Arrow shape — sleek design
         arrow = QPolygonF([
-            QPointF(0, -15),
-            QPointF(-8, 10),
-            QPointF(0, 5),
-            QPointF(8, 10),
+            QPointF(0, -18),
+            QPointF(-9, 12),
+            QPointF(0, 6),
+            QPointF(9, 12),
         ])
-        p.setPen(QPen(QColor("#fbbf24"), 2))
-        p.setBrush(QBrush(QColor("#f59e0b")))
+
+        # Arrow gradient
+        arrow_grad = QLinearGradient(0, -18, 0, 12)
+        arrow_grad.setColorAt(0, QColor("#fbbf24"))
+        arrow_grad.setColorAt(1, QColor("#f59e0b"))
+        p.setPen(QPen(QColor("#fde68a"), 2))
+        p.setBrush(QBrush(arrow_grad))
         p.drawPolygon(arrow)
         p.restore()
 
-        # Araç çevresi
-        p.setPen(QPen(QColor("#f59e0b"), 2))
-        p.setBrush(Qt.NoBrush)
-        p.drawEllipse(QPointF(vx, vy), 20, 20)
-
-        # Sol üst overlay — araç konumu
+        # ── Glassmorphism Overlay — Vehicle Position ──
+        overlay_w, overlay_h = 190, 82
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(15, 23, 42, 220))
-        p.drawRoundedRect(8, 8, 170, 72, 4, 4)
+        p.setBrush(QColor(8, 12, 24, 210))
+        p.drawRoundedRect(10, 10, overlay_w, overlay_h, 12, 12)
+        # Border
+        p.setPen(QPen(QColor(99, 102, 241, 50), 1))
+        p.setBrush(Qt.NoBrush)
+        p.drawRoundedRect(10, 10, overlay_w, overlay_h, 12, 12)
 
-        p.setFont(QFont("Consolas", 8))
-        p.setPen(QColor("#94a3b8"))
-        p.drawText(14, 22, "Vehicle Position")
-        p.setPen(QColor("#22d3ee"))
-        p.drawText(14, 36, f"{self.vehicle_lat:.7f}°N")
-        p.drawText(14, 50, f"{self.vehicle_lon:.7f}°W")
+        p.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        p.setPen(QColor(165, 180, 252, 180))
+        p.drawText(18, 28, "VEHICLE POSITION")
+
+        p.setFont(QFont("JetBrains Mono", 10, QFont.Bold))
+        p.setPen(QColor("#6ee7b7"))
+        p.drawText(18, 46, f"{self.vehicle_lat:.7f}°N")
+        p.drawText(18, 62, f"{self.vehicle_lon:.7f}°W")
         p.setPen(QColor("#fbbf24"))
-        p.drawText(14, 66, f"HDG: {self.vehicle_heading:.1f}°")
+        p.drawText(18, 80, f"HDG: {self.vehicle_heading:.1f}°")
 
-        # Sağ üst — mission state
+        # ── Glassmorphism Overlay — Mission State (sağ üst) ──
         state_text = self.mission_state
-        p.setFont(QFont("Consolas", 9, QFont.Bold))
+        p.setFont(QFont("Segoe UI", 11, QFont.Bold))
         fm = p.fontMetrics()
         tw = fm.horizontalAdvance(state_text)
+        box_w = tw + 28
+        box_h = 32
+        box_x = w - box_w - 10
+        box_y = 10
+
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(15, 23, 42, 220))
-        p.drawRoundedRect(w - tw - 24, 8, tw + 16, 24, 4, 4)
-        p.setPen(QColor("#4ade80"))
-        p.drawText(w - tw - 16, 24, state_text)
+        p.setBrush(QColor(8, 12, 24, 210))
+        p.drawRoundedRect(box_x, box_y, box_w, box_h, 10, 10)
+        p.setPen(QPen(QColor(99, 102, 241, 50), 1))
+        p.setBrush(Qt.NoBrush)
+        p.drawRoundedRect(box_x, box_y, box_w, box_h, 10, 10)
+
+        # State text color based on state
+        if "COMPLETE" in state_text:
+            state_color = QColor("#6ee7b7")
+        elif "E-STOP" in state_text or "FAILSAFE" in state_text:
+            state_color = QColor("#fca5a5")
+        elif state_text == "STANDBY":
+            state_color = QColor("#a5b4fc")
+        else:
+            state_color = QColor("#67e8f9")
+
+        p.setPen(state_color)
+        p.drawText(box_x + 14, box_y + 22, state_text)
 
         p.end()
 
 
 class ObstacleMapWidget(QWidget):
     """
-    Engel / Maliyet Haritası — yerel sensör verilerini gösterir.
-    2m, 5m, 10m menzil çemberleri ile.
+    Premium Engel / Maliyet Haritası — neon glow engeller,
+    radar sweep efekti ve menzil çemberleri.
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(250, 250)
+        self.setMinimumSize(280, 280)
 
         self.vehicle_heading = 0.0
-        self.obstacles = []  # list of (x, y, cost)
+        self.obstacles = []
 
     def set_vehicle_heading(self, heading):
         self.vehicle_heading = heading
@@ -201,81 +268,138 @@ class ObstacleMapWidget(QWidget):
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
         w = self.width()
         h = self.height()
         cx = w / 2
         cy = h / 2
-        scale = min(w, h) / 22.0  # ~20 px/m, adaptive
+        scale = min(w, h) / 22.0
 
-        # Arka plan
-        p.fillRect(0, 0, w, h, QColor("#0a0f1a"))
+        # ── Deep space background ──
+        bg = QRadialGradient(cx, cy, max(w, h) * 0.6)
+        bg.setColorAt(0, QColor("#0f172a"))
+        bg.setColorAt(0.5, QColor("#0a0f1e"))
+        bg.setColorAt(1, QColor("#050810"))
+        p.fillRect(0, 0, w, h, QBrush(bg))
 
-        # Grid
-        p.setPen(QPen(QColor("#1e293b"), 1))
+        # ── Subtle radial grid lines ──
+        p.setPen(QPen(QColor(99, 102, 241, 12), 1))
         for i in range(-10, 11):
             p.drawLine(int(cx + i * scale), 0, int(cx + i * scale), h)
             p.drawLine(0, int(cy + i * scale), w, int(cy + i * scale))
 
-        # Merkez referans çizgileri
-        pen = QPen(QColor("#334155"), 2, Qt.DashLine)
+        # ── Cross hairs ──
+        pen = QPen(QColor(99, 102, 241, 30), 1.5, Qt.DashLine)
+        pen.setDashPattern([6, 4])
         p.setPen(pen)
         p.drawLine(int(cx), 0, int(cx), h)
         p.drawLine(0, int(cy), w, int(cy))
 
-        # Engeller
+        # ── Menzil çemberleri — neon glow ──
+        p.setBrush(Qt.NoBrush)
+        for radius in [2, 5, 10]:
+            r = radius * scale
+            # Glow
+            p.setPen(QPen(QColor(99, 102, 241, 15), 4))
+            p.drawEllipse(QPointF(cx, cy), r, r)
+            # Core
+            p.setPen(QPen(QColor(99, 102, 241, 40), 1))
+            p.drawEllipse(QPointF(cx, cy), r, r)
+            # Label
+            p.setPen(QColor(129, 140, 248, 160))
+            p.setFont(QFont("Segoe UI", 9, QFont.Bold))
+            p.drawText(int(cx + r + 5), int(cy - 3), f"{radius}m")
+
+        # ── Engeller — neon dots ──
         for ox, oy, cost in self.obstacles:
             sx = cx + ox * scale
             sy = cy - oy * scale
             cost = max(0.0, min(1.0, cost))
-            if cost < 0.3:
-                color = QColor(34, 197, 94, int((0.3 + cost) * 255))
-            elif cost < 0.6:
-                color = QColor(251, 191, 36, int((0.5 + cost * 0.5) * 255))
-            else:
-                color = QColor(239, 68, 68, int((0.6 + cost * 0.4) * 255))
-            p.setPen(Qt.NoPen)
-            p.setBrush(QBrush(color))
-            p.drawEllipse(QPointF(sx, sy), 4, 4)
 
-        # Araç
+            if cost < 0.3:
+                base_color = QColor(52, 211, 153)
+                alpha = int(80 + cost * 400)
+            elif cost < 0.6:
+                base_color = QColor(251, 191, 36)
+                alpha = int(100 + cost * 250)
+            else:
+                base_color = QColor(248, 113, 113)
+                alpha = int(150 + cost * 105)
+
+            # Glow
+            glow = QRadialGradient(sx, sy, 8)
+            glow_color = QColor(base_color)
+            glow_color.setAlpha(int(alpha * 0.3))
+            glow.setColorAt(0, glow_color)
+            glow_color2 = QColor(base_color)
+            glow_color2.setAlpha(0)
+            glow.setColorAt(1, glow_color2)
+            p.setPen(Qt.NoPen)
+            p.setBrush(QBrush(glow))
+            p.drawEllipse(QPointF(sx, sy), 8, 8)
+
+            # Core dot
+            core = QColor(base_color)
+            core.setAlpha(alpha)
+            p.setBrush(QBrush(core))
+            p.drawEllipse(QPointF(sx, sy), 3.5, 3.5)
+
+        # ── Araç — premium design ──
         p.save()
         p.translate(cx, cy)
         p.rotate(self.vehicle_heading)
+
+        # Body glow
+        body_glow = QRadialGradient(0, 0, 20)
+        body_glow.setColorAt(0, QColor(99, 102, 241, 50))
+        body_glow.setColorAt(1, QColor(99, 102, 241, 0))
         p.setPen(Qt.NoPen)
-        p.setBrush(QBrush(QColor("#06b6d4")))
-        p.drawRect(-8, -12, 16, 24)
-        # Heading göstergesi
-        tri = QPolygonF([QPointF(0, -15), QPointF(-6, -8), QPointF(6, -8)])
-        p.setBrush(QBrush(QColor("#f59e0b")))
+        p.setBrush(QBrush(body_glow))
+        p.drawEllipse(QPointF(0, 0), 20, 20)
+
+        # Body
+        body_grad = QLinearGradient(0, -14, 0, 14)
+        body_grad.setColorAt(0, QColor("#6366f1"))
+        body_grad.setColorAt(1, QColor("#4f46e5"))
+        p.setBrush(QBrush(body_grad))
+        p.setPen(QPen(QColor("#818cf8"), 1.5))
+        p.drawRoundedRect(-9, -14, 18, 28, 4, 4)
+
+        # Heading triangle
+        tri = QPolygonF([QPointF(0, -18), QPointF(-7, -10), QPointF(7, -10)])
+        tri_grad = QLinearGradient(0, -18, 0, -10)
+        tri_grad.setColorAt(0, QColor("#fbbf24"))
+        tri_grad.setColorAt(1, QColor("#f59e0b"))
+        p.setBrush(QBrush(tri_grad))
+        p.setPen(QPen(QColor("#fde68a"), 1))
         p.drawPolygon(tri)
         p.restore()
 
-        # Menzil çemberleri
+        # ── Glassmorphism Legend ──
+        legend_w, legend_h = 100, 90
+        p.setPen(Qt.NoPen)
+        p.setBrush(QColor(8, 12, 24, 200))
+        p.drawRoundedRect(10, 10, legend_w, legend_h, 10, 10)
+        p.setPen(QPen(QColor(99, 102, 241, 40), 1))
         p.setBrush(Qt.NoBrush)
-        for radius in [2, 5, 10]:
-            p.setPen(QPen(QColor("#1e293b"), 1))
-            r = radius * scale
-            p.drawEllipse(QPointF(cx, cy), r, r)
-            p.setPen(QColor("#475569"))
-            p.setFont(QFont("Consolas", 8))
-            p.drawText(int(cx + r + 3), int(cy + 4), f"{radius}m")
+        p.drawRoundedRect(10, 10, legend_w, legend_h, 10, 10)
 
-        # Legend
-        p.setFont(QFont("Consolas", 9))
-        p.setPen(QColor("#cbd5e1"))
-        p.drawText(10, 18, "Cost Map")
+        p.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        p.setPen(QColor("#c7d2fe"))
+        p.drawText(18, 28, "Cost Map")
 
         legend_items = [
-            (QColor("#22c55e"), "Low"),
+            (QColor("#34d399"), "Low"),
             (QColor("#fbbf24"), "Medium"),
-            (QColor("#ef4444"), "High"),
+            (QColor("#f87171"), "High"),
         ]
         for i, (color, label) in enumerate(legend_items):
-            y = 30 + i * 18
+            y = 38 + i * 18
             p.setPen(Qt.NoPen)
             p.setBrush(QBrush(color))
-            p.drawRect(10, y, 12, 12)
-            p.setPen(QColor("#94a3b8"))
-            p.drawText(26, y + 10, label)
+            p.drawRoundedRect(18, y, 14, 14, 3, 3)
+            p.setPen(QColor(165, 180, 252, 160))
+            p.setFont(QFont("Segoe UI", 9))
+            p.drawText(36, y + 11, label)
 
         p.end()

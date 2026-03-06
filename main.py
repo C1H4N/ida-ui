@@ -36,7 +36,7 @@ from custom_widgets import NavigationMapWidget, ObstacleMapWidget
 # ═══════════════════════════════════════════════════════════
 # pyqtgraph Genel Ayarlar (koyu tema uyumlu)
 # ═══════════════════════════════════════════════════════════
-pg.setConfigOptions(antialias=True, background="#020617", foreground="#94a3b8")
+pg.setConfigOptions(antialias=True, background="#080c18", foreground="#a5b4fc")
 
 
 class GCSMainWindow(QMainWindow):
@@ -152,16 +152,18 @@ class GCSMainWindow(QMainWindow):
 
         # Speed Graph
         self.plot_speed = pg.PlotWidget()
-        self.plot_speed.setLabel("left", "m/s")
-        self.plot_speed.setLabel("bottom", "t")
+        self.plot_speed.setLabel("left", "m/s", **{"font-size": "11pt", "color": "#a5b4fc"})
+        self.plot_speed.setLabel("bottom", "t", **{"font-size": "11pt", "color": "#a5b4fc"})
         self.plot_speed.setYRange(0, 3)
-        self.plot_speed.showGrid(x=True, y=True, alpha=0.15)
-        self.plot_speed.addLegend(offset=(5, 5), labelTextSize="8pt")
+        self.plot_speed.showGrid(x=True, y=True, alpha=0.08)
+        self.plot_speed.addLegend(offset=(5, 5), labelTextSize="10pt")
+        self.plot_speed.getAxis("left").setPen(pg.mkPen("#6366f1", width=1))
+        self.plot_speed.getAxis("bottom").setPen(pg.mkPen("#6366f1", width=1))
         self.curve_speed = self.plot_speed.plot(
-            pen=pg.mkPen("#06b6d4", width=2), name="Speed"
+            pen=pg.mkPen("#818cf8", width=2.5), name="Speed"
         )
         self.curve_speed_target = self.plot_speed.plot(
-            pen=pg.mkPen("#10b981", width=2, style=Qt.DashLine), name="Target"
+            pen=pg.mkPen("#34d399", width=2.5, style=Qt.DashLine), name="Target"
         )
         self._replace_placeholder(
             self.ui.frame_graph_speed, self.ui.graph_speed_placeholder, self.plot_speed
@@ -169,16 +171,18 @@ class GCSMainWindow(QMainWindow):
 
         # Heading Graph
         self.plot_heading = pg.PlotWidget()
-        self.plot_heading.setLabel("left", "°")
-        self.plot_heading.setLabel("bottom", "t")
+        self.plot_heading.setLabel("left", "°", **{"font-size": "11pt", "color": "#a5b4fc"})
+        self.plot_heading.setLabel("bottom", "t", **{"font-size": "11pt", "color": "#a5b4fc"})
         self.plot_heading.setYRange(0, 360)
-        self.plot_heading.showGrid(x=True, y=True, alpha=0.15)
-        self.plot_heading.addLegend(offset=(5, 5), labelTextSize="8pt")
+        self.plot_heading.showGrid(x=True, y=True, alpha=0.08)
+        self.plot_heading.addLegend(offset=(5, 5), labelTextSize="10pt")
+        self.plot_heading.getAxis("left").setPen(pg.mkPen("#6366f1", width=1))
+        self.plot_heading.getAxis("bottom").setPen(pg.mkPen("#6366f1", width=1))
         self.curve_heading = self.plot_heading.plot(
-            pen=pg.mkPen("#f59e0b", width=2), name="Heading"
+            pen=pg.mkPen("#fbbf24", width=2.5), name="Heading"
         )
         self.curve_heading_target = self.plot_heading.plot(
-            pen=pg.mkPen("#10b981", width=2, style=Qt.DashLine), name="Target"
+            pen=pg.mkPen("#34d399", width=2.5, style=Qt.DashLine), name="Target"
         )
         self._replace_placeholder(
             self.ui.frame_graph_heading, self.ui.graph_heading_placeholder, self.plot_heading
@@ -186,16 +190,18 @@ class GCSMainWindow(QMainWindow):
 
         # Thruster Graph
         self.plot_thruster = pg.PlotWidget()
-        self.plot_thruster.setLabel("left", "%")
-        self.plot_thruster.setLabel("bottom", "t")
+        self.plot_thruster.setLabel("left", "%", **{"font-size": "11pt", "color": "#a5b4fc"})
+        self.plot_thruster.setLabel("bottom", "t", **{"font-size": "11pt", "color": "#a5b4fc"})
         self.plot_thruster.setYRange(-100, 100)
-        self.plot_thruster.showGrid(x=True, y=True, alpha=0.15)
-        self.plot_thruster.addLegend(offset=(5, 5), labelTextSize="8pt")
+        self.plot_thruster.showGrid(x=True, y=True, alpha=0.08)
+        self.plot_thruster.addLegend(offset=(5, 5), labelTextSize="10pt")
+        self.plot_thruster.getAxis("left").setPen(pg.mkPen("#6366f1", width=1))
+        self.plot_thruster.getAxis("bottom").setPen(pg.mkPen("#6366f1", width=1))
         self.curve_thruster_l = self.plot_thruster.plot(
-            pen=pg.mkPen("#8b5cf6", width=2), name="Left"
+            pen=pg.mkPen("#a78bfa", width=2.5), name="Left"
         )
         self.curve_thruster_r = self.plot_thruster.plot(
-            pen=pg.mkPen("#ec4899", width=2), name="Right"
+            pen=pg.mkPen("#f472b6", width=2.5), name="Right"
         )
         self._replace_placeholder(
             self.ui.frame_graph_thruster, self.ui.graph_thruster_placeholder, self.plot_thruster
@@ -802,8 +808,8 @@ class GCSMainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
 
-    # Uygulama geneli font
-    font = QFont("Segoe UI", 9)
+    # Uygulama geneli font — premium
+    font = QFont("Segoe UI", 10)
     app.setFont(font)
 
     window = GCSMainWindow()

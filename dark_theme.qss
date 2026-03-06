@@ -1,70 +1,81 @@
 /* ══════════════════════════════════════════════════════════
-   dark_theme.qss — USV GCS Karanlık Tema
-   Teknofest — Slate-900 tabanlı profesyonel tema
+   dark_theme.qss — USV GCS PREMIUM DARK THEME
+   Glassmorphism + Neon accents + Deep space palette
    ══════════════════════════════════════════════════════════ */
 
-/* ─── Genel ─────────────────────────────────────────────── */
+/* ─── Global Reset ─────────────────────────────────────── */
 QMainWindow {
-    background-color: #020617;
-    color: #e2e8f0;
+    background-color: #080c18;
+    color: #e0e7ff;
 }
 
 QWidget {
     background-color: transparent;
-    color: #e2e8f0;
+    color: #e0e7ff;
+    font-family: "Segoe UI", "Inter", sans-serif;
 }
 
 QToolTip {
-    background-color: #0f172a;
+    background-color: rgba(15, 23, 42, 0.95);
     color: #f1f5f9;
-    border: 1px solid #0ea5e9;
-    border-radius: 4px;
-    padding: 2px 4px;
-    font-family: "Consolas", monospace;
-    font-size: 11px;
+    border: 1px solid rgba(99, 102, 241, 0.6);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-size: 12px;
 }
 
-/* ─── Header Frame ──────────────────────────────────────── */
+/* ─── Header Frame — Glassmorphism ──────────────────────── */
 #header_frame {
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 14px;
 }
 
 #lbl_title {
-    color: #f1f5f9;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
 }
 
 #lbl_subtitle {
-    color: #64748b;
+    color: rgba(148, 163, 184, 0.8);
+    font-size: 10px;
 }
 
-/* ─── Mission State Göstergesi ──────────────────────────── */
+/* ─── Mission State Badge ──────────────────────────────── */
 #frame_mission_state {
-    background-color: #0f172a;
-    border: 2px solid #475569;
-    border-radius: 4px;
+    background-color: rgba(15, 23, 42, 0.9);
+    border: 2px solid rgba(99, 102, 241, 0.4);
+    border-radius: 12px;
 }
 
 #lbl_mission_state_label {
-    color: #94a3b8;
+    color: rgba(148, 163, 184, 0.7);
+    font-size: 9px;
+    text-transform: uppercase;
 }
 
 #lbl_mission_state {
-    color: #94a3b8;
+    color: #a5b4fc;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-/* ─── Power Status ──────────────────────────────────────── */
+/* ─── Power Status Badge ───────────────────────────────── */
 #lbl_power_status {
-    color: #22c55e;
-    padding: 0 8px;
+    color: #34d399;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-/* ─── Video Layout Frame ────────────────────────────────── */
+/* ─── Video Layout Bar — Glassmorphism ──────────────────── */
 #frame_video_layout {
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    border-radius: 12px;
 }
 
 #frame_video_layout QLabel {
@@ -72,205 +83,246 @@ QToolTip {
 }
 
 #lbl_video_subtitle {
-    color: #64748b;
+    color: rgba(100, 116, 139, 0.8);
     padding-left: 12px;
+    font-size: 10px;
 }
 
-/* ─── Butonlar ──────────────────────────────────────────── */
+/* ─── Buttons — Neon Gradient Style ─────────────────────── */
 QPushButton {
-    background-color: #1e293b;
-    color: #e2e8f0;
-    border: 1px solid #334155;
-    border-radius: 4px;
-    padding: 4px 12px;
+    background-color: rgba(30, 41, 59, 0.8);
+    color: #e0e7ff;
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 QPushButton:hover {
-    background-color: #334155;
-    border-color: #475569;
+    background-color: rgba(51, 65, 85, 0.9);
+    border-color: rgba(99, 102, 241, 0.5);
 }
 
 QPushButton:pressed {
-    background-color: #475569;
+    background-color: rgba(71, 85, 105, 0.9);
+    border-color: rgba(99, 102, 241, 0.8);
 }
 
 QPushButton:disabled {
-    background-color: #0f172a;
-    color: #475569;
-    border-color: #1e293b;
+    background-color: rgba(15, 23, 42, 0.5);
+    color: rgba(71, 85, 105, 0.6);
+    border-color: rgba(30, 41, 59, 0.4);
 }
 
+/* Start Mission — Emerald Glow */
 #btn_start_mission {
-    background-color: #16a34a;
-    color: white;
-    border: 1px solid #22c55e;
-    font-weight: bold;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #059669, stop:1 #10b981);
+    color: #ffffff;
+    border: 2px solid rgba(52, 211, 153, 0.6);
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 6px 16px;
 }
 
 #btn_start_mission:hover {
-    background-color: #15803d;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #047857, stop:1 #059669);
+    border-color: rgba(52, 211, 153, 0.9);
 }
 
 #btn_start_mission:disabled {
-    background-color: #14532d;
-    color: #6b7280;
-    border-color: #166534;
+    background-color: rgba(20, 83, 45, 0.4);
+    color: rgba(107, 114, 128, 0.6);
+    border-color: rgba(22, 101, 52, 0.3);
 }
 
+/* Upload Mission — Cyan Glow */
 #btn_upload_mission {
-    background-color: #0891b2;
-    color: white;
-    border: 1px solid #06b6d4;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #0e7490, stop:1 #06b6d4);
+    color: #ffffff;
+    border: 2px solid rgba(34, 211, 238, 0.5);
+    border-radius: 10px;
+    font-weight: 700;
 }
 
 #btn_upload_mission:hover {
-    background-color: #0e7490;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #155e75, stop:1 #0e7490);
+    border-color: rgba(34, 211, 238, 0.8);
 }
 
+/* Clear Waypoints */
 #btn_clear_waypoints {
-    background-color: #1e293b;
+    background-color: rgba(30, 41, 59, 0.7);
     color: #94a3b8;
-    border: 1px solid #334155;
+    border: 1px solid rgba(71, 85, 105, 0.4);
+    border-radius: 10px;
 }
 
 #btn_clear_waypoints:hover {
-    background-color: #334155;
+    background-color: rgba(51, 65, 85, 0.8);
     color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.4);
 }
 
+/* E-STOP — Red Pulsing Glow */
 #btn_estop {
-    background-color: #dc2626;
-    color: white;
-    border: 2px solid #ef4444;
-    border-radius: 6px;
-    font-weight: bold;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #dc2626, stop:1 #ef4444);
+    color: #ffffff;
+    border: 3px solid rgba(248, 113, 113, 0.7);
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 6px 14px;
 }
 
 #btn_estop:hover {
-    background-color: #b91c1c;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #b91c1c, stop:1 #dc2626);
+    border-color: rgba(248, 113, 113, 1.0);
 }
 
 #btn_estop:pressed {
     background-color: #991b1b;
 }
 
-/* Checked toggle buttons */
-#btn_single_screen:checked, #btn_3screen:checked {
-    background-color: #0891b2;
-    color: white;
-    border-color: #06b6d4;
+/* Layout Toggle Buttons */
+#btn_single_screen, #btn_3screen {
+    border-radius: 8px;
+    padding: 4px 14px;
+    font-size: 10px;
 }
 
-/* ─── GroupBox — Düz, bubble yok ───────────────────────── */
+#btn_single_screen:checked, #btn_3screen:checked {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #6366f1, stop:1 #8b5cf6);
+    color: #ffffff;
+    border: 1px solid rgba(139, 92, 246, 0.6);
+}
+
+/* ─── GroupBox — Clean, minimal ────────────────────────── */
 QGroupBox {
     background-color: transparent;
     border: none;
     margin-top: 0px;
-    padding-top: 20px;
-    padding-left: 4px;
-    padding-right: 4px;
-    color: #e2e8f0;
+    padding-top: 24px;
+    padding-left: 6px;
+    padding-right: 6px;
+    color: #e0e7ff;
 }
 
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 6px;
+    padding: 0 8px;
     background-color: transparent;
     border: none;
-    color: #94a3b8;
-    font-size: 11px;
+    color: #818cf8;
+    font-size: 12px;
+    font-weight: 700;
 }
 
-/* ─── Panel Containers (dış çerçeve — yuvarlatılmış) ───── */
+/* ─── Panel Containers — Deep Glass ─────────────────────── */
 #panel_top_container {
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 16px;
 }
 
 #panel_bottom_left {
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 16px;
 }
 
 #panel_bottom_right {
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 16px;
 }
 
-/* ─── Inputs ────────────────────────────────────────────── */
+/* ─── Inputs — Frosted Glass ────────────────────────────── */
 QLineEdit {
-    background-color: #1e293b;
+    background-color: rgba(15, 23, 42, 0.8);
     color: #f1f5f9;
-    border: 1px solid #334155;
-    border-radius: 3px;
-    padding: 4px 6px;
-    selection-background-color: #0891b2;
+    border: 2px solid rgba(71, 85, 105, 0.4);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-size: 12px;
+    selection-background-color: rgba(99, 102, 241, 0.5);
 }
 
 QLineEdit:focus {
-    border-color: #06b6d4;
+    border-color: rgba(99, 102, 241, 0.8);
+    background-color: rgba(15, 23, 42, 0.95);
 }
 
 QLineEdit:disabled {
-    background-color: #0f172a;
-    color: #475569;
-    border-color: #1e293b;
+    background-color: rgba(15, 23, 42, 0.3);
+    color: rgba(71, 85, 105, 0.5);
+    border-color: rgba(30, 41, 59, 0.3);
 }
 
 QComboBox {
-    background-color: #1e293b;
+    background-color: rgba(15, 23, 42, 0.8);
     color: #f1f5f9;
-    border: 1px solid #334155;
-    border-radius: 3px;
-    padding: 4px 8px;
+    border: 2px solid rgba(71, 85, 105, 0.4);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
 }
 
 QComboBox:disabled {
-    background-color: #0f172a;
-    color: #475569;
+    background-color: rgba(15, 23, 42, 0.3);
+    color: rgba(71, 85, 105, 0.5);
 }
 
 QComboBox::drop-down {
     border: none;
-    width: 20px;
+    width: 24px;
 }
 
 QComboBox QAbstractItemView {
-    background-color: #1e293b;
+    background-color: rgba(15, 23, 42, 0.95);
     color: #f1f5f9;
-    border: 1px solid #334155;
-    selection-background-color: #0891b2;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    selection-background-color: rgba(99, 102, 241, 0.4);
+    padding: 4px;
 }
 
-/* ─── CheckBox (Modern Gösterge) ────────────────────────── */
+/* ─── CheckBox — Neon Toggle ────────────────────────────── */
 QCheckBox {
     color: #cbd5e1;
-    spacing: 8px;
+    spacing: 10px;
+    font-size: 12px;
 }
 
 QCheckBox::indicator {
-    width: 16px; 
-    height: 16px; 
-    border-radius: 4px; 
-    border: 2px solid #475569; 
-    background: #1e293b;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid rgba(99, 102, 241, 0.4);
+    background: rgba(15, 23, 42, 0.6);
 }
 
 QCheckBox::indicator:hover {
-    border-color: #0ea5e9;
+    border-color: rgba(129, 140, 248, 0.8);
 }
 
 QCheckBox::indicator:checked {
-    background-color: #0ea5e9;
-    border-color: #0ea5e9;
-    /* icon kullanımı istenirse eklenebilir: image: url("path"); */
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #6366f1, stop:1 #8b5cf6);
+    border-color: #a5b4fc;
 }
 
-/* ─── Scroll Area ───────────────────────────────────────── */
+/* ─── Scroll Area — Invisible ───────────────────────────── */
 QScrollArea {
     background-color: transparent;
     border: none;
@@ -278,19 +330,20 @@ QScrollArea {
 
 QScrollBar:vertical {
     background-color: transparent;
-    width: 6px;
+    width: 8px;
     border: none;
-    border-radius: 3px;
+    border-radius: 4px;
+    margin: 4px 0;
 }
 
 QScrollBar::handle:vertical {
-    background-color: #334155;
-    border-radius: 3px;
-    min-height: 20px;
+    background-color: rgba(99, 102, 241, 0.3);
+    border-radius: 4px;
+    min-height: 30px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background-color: #475569;
+    background-color: rgba(99, 102, 241, 0.6);
 }
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
@@ -301,91 +354,104 @@ QScrollBar:horizontal {
     height: 0;
 }
 
-/* ─── Section Headers (panel içi) ──────────────────────── */
+/* ─── Section Headers ──────────────────────────────────── */
 #section_header {
-    color: #e2e8f0;
-    padding: 4px 0;
+    color: #c7d2fe;
+    padding: 8px 0;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
-/* ─── Separator (ince çizgi) ──────────────────────────── */
+/* ─── Separator ────────────────────────────────────────── */
 #panel_separator {
-    background-color: #1e293b;
+    background-color: rgba(99, 102, 241, 0.15);
     max-height: 1px;
     min-height: 1px;
 }
 
-/* ─── WP Groups — border yok, sadece hafif alt çizgi ──── */
+/* ─── WP Groups — Subtle card style ────────────────────── */
 #wp_group {
-    background-color: transparent;
-    border: none;
-    border-bottom: 1px solid #1e293b;
-    border-radius: 0px;
-    margin-top: 0px;
-    padding-top: 16px;
-    padding-bottom: 6px;
+    background-color: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(71, 85, 105, 0.2);
+    border-radius: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding: 12px 8px 8px 8px;
 }
 
 #wp_group::title {
-    color: #64748b;
+    color: #818cf8;
     background-color: transparent;
-    padding: 0 4px;
+    padding: 0 6px;
+    font-weight: 700;
 }
 
-/* ─── Telemetri ─────────────────────────────────────────── */
+/* ─── Telemetry ─────────────────────────────────────────── */
 #telem_section_header {
-    color: #cbd5e1;
-    padding: 6px 0 2px 0;
+    color: #a5b4fc;
+    padding: 10px 0 4px 0;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 #telem_label {
-    color: #64748b;
+    color: rgba(148, 163, 184, 0.7);
+    font-size: 11px;
 }
 
 #telem_value {
-    color: #f1f5f9;
+    color: #e0e7ff;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 #telem_separator {
-    background-color: #1e293b;
+    background-color: rgba(99, 102, 241, 0.08);
     max-height: 1px;
 }
 
 /* ─── Vehicle Mode ──────────────────────────────────────── */
 #frame_vehicle_mode {
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 4px;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(99, 102, 241, 0.3);
+    border-radius: 12px;
+    padding: 6px;
 }
 
 #frame_vehicle_mode QLabel {
-    color: #94a3b8;
+    color: rgba(148, 163, 184, 0.7);
 }
 
 #lbl_vehicle_mode {
-    color: #60a5fa;
+    color: #818cf8;
+    font-size: 18px;
+    font-weight: 800;
 }
 
 /* ─── Power Cut Warning ─────────────────────────────────── */
 #frame_power_cut {
-    background-color: #450a0a;
-    border: 1px solid #dc2626;
-    border-radius: 4px;
+    background-color: rgba(69, 10, 10, 0.9);
+    border: 2px solid rgba(220, 38, 38, 0.8);
+    border-radius: 10px;
 }
 
 #frame_power_cut QLabel {
-    color: #f87171;
+    color: #fca5a5;
+    font-weight: 700;
 }
 
 /* ─── Upload Status ─────────────────────────────────────── */
 #lbl_upload_status {
-    background-color: #1e293b;
-    border: 1px solid #16a34a;
-    border-radius: 4px;
-    color: #4ade80;
-    padding: 4px 8px;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(52, 211, 153, 0.5);
+    border-radius: 10px;
+    color: #6ee7b7;
+    padding: 8px 12px;
+    font-size: 11px;
 }
 
-/* ─── Map Frame — border yok, panel içinde ─────────────── */
+/* ─── Map Frame ─────────────────────────────────────────── */
 #map_frame {
     background-color: transparent;
     border: none;
@@ -398,36 +464,46 @@ QScrollBar:horizontal {
 }
 
 #accent_bar {
-    background-color: #06b6d4;
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #6366f1, stop:1 #8b5cf6);
     border-radius: 2px;
 }
 
-/* ─── Graph Frames ──────────────────────────────────────── */
+/* ─── Graph Frames — Glass cards ────────────────────────── */
 #graph_frame {
-    background-color: #020617;
-    border: 1px solid #1e293b;
-    border-radius: 4px;
+    background-color: rgba(8, 12, 24, 0.9);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 14px;
 }
 
 #graph_frame QLabel {
-    color: #94a3b8;
+    color: #a5b4fc;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 /* ─── Data Logging Rec Labels ───────────────────────────── */
 #rec_inactive {
-    color: #475569;
+    color: rgba(71, 85, 105, 0.5);
+    font-size: 11px;
 }
 
 #rec_active {
-    color: #22c55e;
+    color: #34d399;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 #lbl_utc_time {
-    color: #f1f5f9;
+    color: #e0e7ff;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 #lbl_competition_timer {
     color: #fbbf24;
+    font-size: 20px;
+    font-weight: 800;
 }
 
 /* ─── Obstacle Map ──────────────────────────────────────── */
@@ -435,120 +511,136 @@ QScrollBar:horizontal {
     color: #94a3b8;
 }
 
-/* ─── 3-Screen Mode — Ekran Çerçeveleri ─────────────────── */
+/* ─── 3-Screen Mode Frames — Distinct Neon Borders ──────── */
 #screen_frame_1 {
-    background-color: #0f172a;
-    border: 2px solid #1e40af;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(99, 102, 241, 0.5);
+    border-radius: 16px;
 }
 
 #screen_frame_2 {
-    background-color: #0f172a;
-    border: 2px solid #0e7490;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(14, 165, 233, 0.5);
+    border-radius: 16px;
 }
 
 #screen_frame_3 {
-    background-color: #0f172a;
-    border: 2px solid #6d28d9;
-    border-radius: 8px;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 2px solid rgba(168, 85, 247, 0.5);
+    border-radius: 16px;
 }
 
 #screen_header {
-    color: #94a3b8;
-    background-color: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 3px;
-    padding: 2px 8px;
+    color: #c7d2fe;
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 /* ─── Separator ─────────────────────────────────────────── */
 #separator {
-    color: #1e293b;
+    color: rgba(99, 102, 241, 0.15);
 }
 
 QFrame[frameShape="4"],
 QFrame[frameShape="5"] {
-    color: #1e293b;
+    color: rgba(99, 102, 241, 0.15);
 }
 
 /* ─── Vertical Panel Separators ─────────────────────────── */
 #vertical_separator {
-    background-color: #1e293b;
+    background-color: rgba(99, 102, 241, 0.15);
     max-width: 1px;
     min-width: 1px;
 }
 
-/* ─── Splitter Handle ───────────────────────────────────── */
+/* ─── Splitter Handle — Neon Accent ─────────────────────── */
 QSplitter::handle {
-    background-color: #1e293b;
+    background-color: rgba(99, 102, 241, 0.1);
 }
 
 QSplitter::handle:horizontal {
-    width: 4px;
+    width: 6px;
+    border-radius: 3px;
 }
 
 QSplitter::handle:vertical {
-    height: 4px;
+    height: 6px;
+    border-radius: 3px;
 }
 
 QSplitter::handle:hover {
-    background-color: #334155;
+    background-color: rgba(99, 102, 241, 0.4);
 }
 
-/* ─── Mission Progress Bar ──────────────────────────────── */
+/* ─── Mission Progress Bar — Gradient Glow ──────────────── */
 #lbl_mission_progress {
-    color: #94a3b8;
+    color: #a5b4fc;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 #progress_mission {
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 6px;
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
 }
 
 #progress_mission::chunk {
     background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #0891b2, stop:1 #06b6d4);
-    border-radius: 5px;
+        stop:0 #6366f1, stop:0.5 #8b5cf6, stop:1 #a78bfa);
+    border-radius: 6px;
 }
 
-/* ─── Mode Switch Button ───────────────────────────────── */
+/* ─── Mode Switch Button — Gradient ────────────────────── */
 #btn_mode_switch {
-    background-color: #1a2e1a;
-    color: #4ade80;
-    border: 1px solid #16a34a;
-    border-radius: 4px;
-    padding: 4px 8px;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 rgba(22, 163, 74, 0.25), stop:1 rgba(52, 211, 153, 0.15));
+    color: #6ee7b7;
+    border: 2px solid rgba(52, 211, 153, 0.4);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 12px;
 }
 
 #btn_mode_switch:hover {
-    background-color: #22c55e;
-    color: #020617;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 rgba(52, 211, 153, 0.4), stop:1 rgba(74, 222, 128, 0.3));
+    color: #ffffff;
+    border-color: rgba(74, 222, 128, 0.7);
 }
 
 #btn_mode_switch:disabled {
-    background-color: #1e293b;
-    color: #475569;
-    border-color: #334155;
+    background-color: rgba(30, 41, 59, 0.4);
+    color: rgba(71, 85, 105, 0.5);
+    border-color: rgba(51, 65, 85, 0.3);
 }
 
-/* ─── Failsafe Warning Banner ──────────────────────────── */
+/* ─── Failsafe Warning Banner — Pulsing Red ────────────── */
 #frame_failsafe {
-    background-color: #7f1d1d;
-    border: 2px solid #dc2626;
-    border-radius: 4px;
+    background-color: rgba(127, 29, 29, 0.9);
+    border: 3px solid rgba(220, 38, 38, 0.8);
+    border-radius: 12px;
 }
 
 #frame_failsafe QLabel {
     color: #fca5a5;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
-/* ─── Status Bar ────────────────────────────────────────── */
+/* ─── Status Bar — Subtle ───────────────────────────────── */
 QStatusBar {
-    background-color: #0f172a;
-    color: #64748b;
-    border-top: 1px solid #1e293b;
-    font-family: "Consolas";
-    font-size: 10px;
+    background-color: rgba(15, 23, 42, 0.9);
+    color: rgba(148, 163, 184, 0.8);
+    border-top: 1px solid rgba(99, 102, 241, 0.15);
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-size: 11px;
+    padding: 2px 8px;
 }
