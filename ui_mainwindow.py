@@ -131,7 +131,7 @@ class Ui_MainWindow:
         self.lbl_title = QLabel("⛵  USV Yer Kontrol İstasyonu")
         self.lbl_title.setObjectName("lbl_title")
         self.lbl_title.setFont(QFont("Segoe UI", 19, QFont.Bold))
-        self.lbl_subtitle = QLabel("Otonom Navigasyon Monitörü  ●  Teknofest 2025")
+        self.lbl_subtitle = QLabel("Otonom Navigasyon Monitörü  ●  Teknofest 2026")
         self.lbl_subtitle.setObjectName("lbl_subtitle")
         self.lbl_subtitle.setFont(QFont("JetBrains Mono", 11))
         title_layout.addWidget(self.lbl_title)
@@ -203,6 +203,23 @@ class Ui_MainWindow:
         self.lbl_power_status.setFont(QFont("JetBrains Mono", 14, QFont.Bold))
         header_layout.addWidget(self.lbl_power_status)
 
+        # Bağlantı Sağlık Göstergeleri
+        indicator_layout = QVBoxLayout()
+        indicator_layout.setSpacing(2)
+        self.lbl_ind_rc = QLabel("● RC Bağlı")
+        self.lbl_ind_rc.setFont(QFont("JetBrains Mono", 10, QFont.Bold))
+        self.lbl_ind_rc.setStyleSheet("color: #4ade80; font-weight: bold;")
+        self.lbl_ind_telem = QLabel("● Telem OK")
+        self.lbl_ind_telem.setFont(QFont("JetBrains Mono", 10, QFont.Bold))
+        self.lbl_ind_telem.setStyleSheet("color: #4ade80; font-weight: bold;")
+        self.lbl_ind_gps = QLabel("● GPS RTK")
+        self.lbl_ind_gps.setFont(QFont("JetBrains Mono", 10, QFont.Bold))
+        self.lbl_ind_gps.setStyleSheet("color: #4ade80; font-weight: bold;")
+        indicator_layout.addWidget(self.lbl_ind_rc)
+        indicator_layout.addWidget(self.lbl_ind_telem)
+        indicator_layout.addWidget(self.lbl_ind_gps)
+        header_layout.addLayout(indicator_layout)
+
     # ═══════════════════════════════════════════════════════
     # VIDEO LAYOUT SELECTOR BAR
     # ═══════════════════════════════════════════════════════
@@ -255,7 +272,7 @@ class Ui_MainWindow:
         self.btn_console_toggle = QPushButton("🖥  Konsol")
         self.btn_console_toggle.setObjectName("btn_console_toggle")
         self.btn_console_toggle.setCheckable(True)
-        self.btn_console_toggle.setChecked(False)
+        self.btn_console_toggle.setChecked(True)
         self.btn_console_toggle.setFixedHeight(34)
         self.btn_console_toggle.setFont(QFont("Segoe UI", 12, QFont.Bold))
         self.btn_console_toggle.setCursor(Qt.PointingHandCursor)
@@ -297,7 +314,7 @@ class Ui_MainWindow:
         self.console_text.setPlaceholderText("Sistem logları burada görüntülenecek...")
         console_lay.addWidget(self.console_text, 1)
 
-        self.frame_console.hide()
+        self.frame_console.show()
         self.main_layout.addWidget(self.frame_console)
 
     # ═══════════════════════════════════════════════════════
@@ -390,6 +407,21 @@ class Ui_MainWindow:
         self.combo_target_color.addItems(["Kırmızı", "Yeşil", "Mavi", "Sarı"])
         mission_lay.addWidget(self.combo_target_color)
 
+        # Hedef Renk Badge (büyük görünür badge)
+        self.lbl_color_badge = QLabel("● Kırmızı")
+        self.lbl_color_badge.setFont(QFont("Segoe UI", 16, QFont.Bold))
+        self.lbl_color_badge.setFixedHeight(44)
+        self.lbl_color_badge.setAlignment(Qt.AlignCenter)
+        self.lbl_color_badge.setStyleSheet(
+            "background-color: rgba(220, 38, 38, 0.2); "
+            "border: 2px solid #dc2626; border-radius: 10px; "
+            "color: #fca5a5; padding: 4px 12px;"
+        )
+        mission_lay.addWidget(self.lbl_color_badge)
+
+        # Badge renk güncelleme
+        self.combo_target_color.currentTextChanged.connect(self._update_color_badge)
+
         # Upload Status
         self.lbl_upload_status = QLabel("")
         self.lbl_upload_status.setObjectName("lbl_upload_status")
@@ -437,7 +469,7 @@ class Ui_MainWindow:
         compat_header = QHBoxLayout()
         lbl_compat_icon = QLabel("✅")
         lbl_compat_icon.setFont(QFont("Segoe UI", 14))
-        lbl_compat = QLabel("UÇUŞ ÖNCESİ KONTROL")
+        lbl_compat = QLabel("SEFER ÖNCESİ KONTROL")
         lbl_compat.setFont(QFont("Segoe UI", 13, QFont.Bold))
         lbl_compat.setStyleSheet("color: #c7d2fe;")
         compat_header.addWidget(lbl_compat_icon)
@@ -458,7 +490,7 @@ class Ui_MainWindow:
         freq_layout.addWidget(self.combo_frequency, 1)
         mission_lay.addLayout(freq_layout)
 
-        self.check_wifi = QCheckBox("Wi-Fi Kapalı (Zorunlu)")
+        self.check_wifi = QCheckBox("Wi-Fi Kapalı (Şartname)")
         self.check_wifi.setFont(QFont("Segoe UI", 12))
         self.check_race_mode = QCheckBox("Yarışma Modu Onaylandı")
         self.check_race_mode.setFont(QFont("Segoe UI", 12))
@@ -967,6 +999,21 @@ class Ui_MainWindow:
         self.telem_layout.addWidget(sep)
 
         self.telem_labels[key] = lbl_value
+
+    def _update_color_badge(self, color_text):
+        """Hedef renk seçildiğinde badge'i güncelle."""
+        color_map = {
+            "Kırmızı": ("#dc2626", "#fca5a5", "rgba(220, 38, 38, 0.2)"),
+            "Yeşil":   ("#16a34a", "#86efac", "rgba(22, 163, 74, 0.2)"),
+            "Mavi":    ("#2563eb", "#93c5fd", "rgba(37, 99, 235, 0.2)"),
+            "Sarı":    ("#ca8a04", "#fde68a", "rgba(202, 138, 4, 0.2)"),
+        }
+        border, text, bg = color_map.get(color_text, color_map["Kırmızı"])
+        self.lbl_color_badge.setText(f"● {color_text}")
+        self.lbl_color_badge.setStyleSheet(
+            f"background-color: {bg}; border: 2px solid {border}; "
+            f"border-radius: 10px; color: {text}; padding: 4px 12px;"
+        )
 
     def retranslateUi(self, MainWindow):
         """Metin çevirileri (pyuic5 uyumlu)"""

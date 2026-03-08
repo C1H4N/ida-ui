@@ -31,6 +31,7 @@ import pyqtgraph as pg
 # UI ve özel widget'lar
 from ui_mainwindow import Ui_MainWindow
 from custom_widgets import NavigationMapWidget, ObstacleMapWidget
+from toast_widget import ToastManager
 
 
 # ═══════════════════════════════════════════════════════════
@@ -267,7 +268,7 @@ class GCSMainWindow(QMainWindow):
         """Konsol paneline log mesajı ekler."""
         ts = datetime.now().strftime("%H:%M:%S")
         color_map = {
-            "INFO": "#a5b4fc",
+            "INFO": "#67e8f9",
             "WARN": "#fbbf24",
             "ERROR": "#f87171",
             "SUCCESS": "#4ade80",
@@ -306,13 +307,13 @@ class GCSMainWindow(QMainWindow):
             return
             
         if not self.ui.check_wifi.isChecked() or not self.ui.check_race_mode.isChecked():
-            QMessageBox.warning(self, "Uyarı", "Lütfen UÇUŞ ÖNCESİ KONTROL panelindeki tüm onayları verin!")
-            self._log_to_console("Görev başlatılamadı: Uçuş öncesi kontrol eksik", "WARN")
+            ToastManager.show_toast(self, "Sefer öncesi kontrol panelindeki tüm onayları verin!", "warning", 4000)
+            self._log_to_console("Görev başlatılamadı: Sefer öncesi kontrol eksik", "WARN")
             return
             
         wp = self._get_waypoints()
         if not wp:
-            QMessageBox.warning(self, "Hata", "Geçerli bir waypoint yüklenmedi!\nKoordinatların formatı tam ondalıklı (örn. 37.8043514) olmalı ve noktadan sonra 7 hane bulundurmalıdır.")
+            ToastManager.show_toast(self, "Geçerli waypoint yüklenmedi!\nFormat: 37.8043514", "error", 5000)
             self._log_to_console("Görev başlatılamadı: Geçerli waypoint bulunamadı", "ERROR")
             return
 
@@ -322,13 +323,19 @@ class GCSMainWindow(QMainWindow):
 
         self.mission_started = True
         self.vehicle["mode"] = "GÖREV"
-        self.mission_state = "WP1 → WP2"
-        self.active_waypoint = 0
+        # Araç WP1'de başlıyor, hedef WP2 olacak
+        if len(wp) > 1:
+            self.active_waypoint = 1
+            self.mission_state = "WP1 → WP2"
+        else:
+            self.active_waypoint = 0
+            self.mission_state = "WP1'e gidiliyor"
         self._update_mission_state_display()
         self._update_mission_progress()
         self._set_mission_lock(True)
         self.ui.btn_start_mission.setEnabled(False)
         self._start_csv_logging()
+        ToastManager.show_toast(self, f"Görev başlatıldı — {len(wp)} waypoint yüklendi", "success", 3000)
         self._log_to_console(f"Görev başlatıldı — {len(wp)} waypoint yüklendi", "SUCCESS")
         self._log_to_console(f"Araç konumu WP1'e taşındı: ({wp[0][0]:.7f}, {wp[0][1]:.7f})", "INFO")
         self.statusBar().showMessage("✓ Görev başlatıldı — Araç otonom çalışıyor")
@@ -362,10 +369,10 @@ class GCSMainWindow(QMainWindow):
             self._log_to_console(f"Dosyadan {idx} waypoint okundu: {os.path.basename(file_path)}", "SUCCESS")
             self.statusBar().showMessage(f"✓ Dosyadan {idx} waypoint okundu")
             if idx == 0:
-                QMessageBox.warning(self, "Uyarı", "Seçilen dosyadan hiç geçerli koordinat satırı okunamadı.")
+                ToastManager.show_toast(self, "Dosyadan geçerli koordinat okunamadı", "warning", 4000)
                 self._log_to_console("Dosyada geçerli koordinat bulunamadı", "WARN")
         except Exception as e:
-            QMessageBox.critical(self, "Hata", f"Dosya okunurken hata oluştu:\n{e}")
+            ToastManager.show_toast(self, f"Dosya okuma hatası: {e}", "error", 5000)
             self._log_to_console(f"Dosya okuma hatası: {e}", "ERROR")
 
     def _on_upload_mission(self):
@@ -375,6 +382,7 @@ class GCSMainWindow(QMainWindow):
         wp = self._get_waypoints()
         self.ui.lbl_upload_status.setText(f"✓ {ts} UTC'de yüklendi ({len(wp)} WP)")
         self.ui.lbl_upload_status.show()
+        ToastManager.show_toast(self, f"Görev yüklendi — {len(wp)} waypoint", "success", 3000)
         self._log_to_console(f"Görev yüklendi — {len(wp)} waypoint, {ts} UTC", "SUCCESS")
         self.statusBar().showMessage("✓ Görev waypoint'leri başarıyla yüklendi")
 
@@ -404,10 +412,9 @@ class GCSMainWindow(QMainWindow):
         self.ui.btn_start_mission.setEnabled(False)
         self._log_to_console("ACİL DURDURMA aktif edildi — Güç kesildi!", "ERROR")
         self.statusBar().showMessage("⚠ ACİL DURDURMA AKTİF — Güç kesildi!")
-
-        QMessageBox.critical(
-            self, "ACİL DURDURMA",
-            "Acil durdurma aktif edildi!\nAraç güç kesimi durumunda.",
+        ToastManager.show_toast(
+            self, "ACİL DURDURMA AKTİF!\nAraç güç kesimi durumunda.",
+            "error", persistent=True, center=True
         )
 
     def _on_mode_switch(self):
@@ -505,6 +512,7 @@ class GCSMainWindow(QMainWindow):
                 new_wp = self.active_waypoint + 1
                 self.mission_state = f"WP{old_wp} → WP{new_wp}"
                 self._log_to_console(f"Waypoint {old_wp} ulaşıldı → WP{new_wp}'e yönleniyor", "SUCCESS")
+                ToastManager.show_toast(self, f"Waypoint {old_wp}'e ulaşıldı → WP{new_wp}", "info", 2500)
             else:
                 self.mission_state = "GÖREV TAMAMLANDI"
                 v["ground_speed"] = 0.0
@@ -513,6 +521,7 @@ class GCSMainWindow(QMainWindow):
                 self._update_telemetry_display()
                 self._update_mission_progress()
                 self._log_to_console("Görev tamamlandı! Tüm waypoint'lere ulaşıldı.", "SUCCESS")
+                ToastManager.show_toast(self, "Görev tamamlandı! Tüm waypoint'lere ulaşıldı.", "success", 5000)
             self._update_mission_state_display()
             return
 
@@ -574,7 +583,25 @@ class GCSMainWindow(QMainWindow):
             self.competition_time -= 1
         minutes = self.competition_time // 60
         seconds = self.competition_time % 60
-        self.ui.lbl_competition_timer.setText(f"{minutes:02d}:{seconds:02d}")
+        timer_text = f"{minutes:02d}:{seconds:02d}"
+        self.ui.lbl_competition_timer.setText(timer_text)
+
+        # Timer renk uyarıları
+        total_secs = self.competition_time
+        if total_secs <= 0 and self.mission_started:
+            self.ui.lbl_competition_timer.setStyleSheet("color: #ef4444; font-weight: bold;")
+            if not hasattr(self, '_time_expired_shown'):
+                self._time_expired_shown = True
+                ToastManager.show_toast(
+                    self, "SÜRE DOLDU!", "error", persistent=True, center=True
+                )
+                self._log_to_console("SÜRE DOLDU!", "ERROR")
+        elif total_secs <= 120:
+            self.ui.lbl_competition_timer.setStyleSheet("color: #ef4444; font-weight: bold;")
+        elif total_secs <= 300:
+            self.ui.lbl_competition_timer.setStyleSheet("color: #f97316; font-weight: bold;")
+        else:
+            self.ui.lbl_competition_timer.setStyleSheet("color: #fbbf24;")
 
         # Recording göstergeleri
         if self.mission_started:
@@ -587,6 +614,9 @@ class GCSMainWindow(QMainWindow):
                         self.ui.lbl_rec_autonomy, self.ui.lbl_rec_map]:
                 lbl.setObjectName("rec_inactive")
                 lbl.setStyleSheet("color: #475569;")
+
+        # Bağlantı sağlık göstergeleri güncelle
+        self._update_connection_indicators()
 
     # ═══════════════════════════════════════════════════════
     # ENGEL HARİTASI GÜNCELLEME (5s)
@@ -738,25 +768,106 @@ class GCSMainWindow(QMainWindow):
 
         lbl.setText(state)
 
+        # Pulse/blink timer'larını durdur
+        if hasattr(self, '_state_blink_timer'):
+            self._state_blink_timer.stop()
+
         if state == "BEKLEMEDE":
             lbl.setStyleSheet("color: #94a3b8;")
             frame.setStyleSheet(
-                "background-color: #0f172a; border: 2px solid #475569; border-radius: 4px;"
+                "background-color: #0f172a; border: 2px solid #475569; border-radius: 12px;"
             )
         elif "ACİL" in state or "E-STOP" in state:
             lbl.setStyleSheet("color: #f87171;")
             frame.setStyleSheet(
-                "background-color: #450a0a; border: 2px solid #dc2626; border-radius: 4px;"
+                "background-color: #450a0a; border: 2px solid #dc2626; border-radius: 12px;"
             )
+            # Yanıp sönme (yavaş)
+            if not hasattr(self, '_state_blink_timer'):
+                self._state_blink_timer = QTimer(self)
+                self._state_blink_visible = True
+            self._state_blink_timer.timeout.connect(self._toggle_state_blink)
+            self._state_blink_timer.start(800)
         elif "TAMAMLANDI" in state or "COMPLETE" in state:
             lbl.setStyleSheet("color: #4ade80;")
             frame.setStyleSheet(
-                "background-color: #052e16; border: 2px solid #16a34a; border-radius: 4px;"
+                "background-color: #052e16; border: 2px solid #16a34a; border-radius: 12px;"
+            )
+        elif self.vehicle.get("mode") == "GÖREV":
+            lbl.setStyleSheet("color: #4ade80;")
+            frame.setStyleSheet(
+                "background-color: #052e16; border: 2px solid #22c55e; border-radius: 12px;"
+            )
+            # Yavaş pulse (GÖREV modu)
+            if not hasattr(self, '_state_blink_timer'):
+                self._state_blink_timer = QTimer(self)
+                self._state_blink_visible = True
+            self._state_blink_timer.timeout.connect(self._toggle_state_pulse)
+            self._state_blink_timer.start(1500)
+        elif self.vehicle.get("mode") == "MANUEL":
+            lbl.setStyleSheet("color: #60a5fa;")
+            frame.setStyleSheet(
+                "background-color: #0c1e3d; border: 2px solid #3b82f6; border-radius: 12px;"
             )
         else:
             lbl.setStyleSheet("color: #22d3ee;")
             frame.setStyleSheet(
-                "background-color: #083344; border: 2px solid #0891b2; border-radius: 4px;"
+                "background-color: #083344; border: 2px solid #0891b2; border-radius: 12px;"
+            )
+
+    def _toggle_state_blink(self):
+        """ACİL DURDUR yanıp sönme."""
+        self._state_blink_visible = not self._state_blink_visible
+        if self._state_blink_visible:
+            self.ui.frame_mission_state.setStyleSheet(
+                "background-color: #450a0a; border: 2px solid #dc2626; border-radius: 12px;"
+            )
+        else:
+            self.ui.frame_mission_state.setStyleSheet(
+                "background-color: #1c0505; border: 2px solid #7f1d1d; border-radius: 12px;"
+            )
+
+    def _toggle_state_pulse(self):
+        """GÖREV modu yavaş pulse."""
+        self._state_blink_visible = not self._state_blink_visible
+        if self._state_blink_visible:
+            self.ui.frame_mission_state.setStyleSheet(
+                "background-color: #052e16; border: 2px solid #22c55e; border-radius: 12px;"
+            )
+        else:
+            self.ui.frame_mission_state.setStyleSheet(
+                "background-color: #041f10; border: 2px solid #166534; border-radius: 12px;"
+            )
+
+    def _update_connection_indicators(self):
+        """Header'daki bağlantı sağlık göstergelerini güncelle."""
+        v = self.vehicle
+
+        # RC bağlantı
+        rc_ok = not self.failsafe_active and v.get("rc_link") == "Bağlı"
+        self.ui.lbl_ind_rc.setText(f"● RC {'Bağlı' if rc_ok else 'KOPTU'}")
+        self.ui.lbl_ind_rc.setStyleSheet(f"color: {'#4ade80' if rc_ok else '#f87171'}; font-weight: bold;")
+
+        # Telemetri
+        telem_ok = v.get("telem_link", 0) > 60
+        self.ui.lbl_ind_telem.setText(f"● Telem {'OK' if telem_ok else 'DÜŞÜK'}")
+        self.ui.lbl_ind_telem.setStyleSheet(f"color: {'#4ade80' if telem_ok else '#f87171'}; font-weight: bold;")
+
+        # GPS
+        gps_fix = v.get("gps_fix", "")
+        gps_ok = "Fixed" in str(gps_fix) or "3D" in str(gps_fix)
+        self.ui.lbl_ind_gps.setText(f"● GPS {gps_fix}")
+        self.ui.lbl_ind_gps.setStyleSheet(f"color: {'#4ade80' if gps_ok else '#fbbf24'}; font-weight: bold;")
+
+        # Header border: kopukluk varsa kırmızı
+        any_bad = not rc_ok or not telem_ok
+        if any_bad:
+            self.ui.header_frame.setStyleSheet(
+                self.ui.header_frame.styleSheet().replace(
+                    "border-color: rgba(99, 102, 241",
+                    "border-color: rgba(220, 38, 38"
+                ) if "border-color" in self.ui.header_frame.styleSheet()
+                else ""
             )
 
     # ═══════════════════════════════════════════════════════
